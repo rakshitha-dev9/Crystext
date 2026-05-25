@@ -1,0 +1,9 @@
+flask
+flask-cors
+torch
+transformers
+peft
+bitsandbytes
+pymatgen
+accelerate
+huggingface_hub

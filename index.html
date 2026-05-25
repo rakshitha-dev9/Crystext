@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrysText — Crystal Structure Generation</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --or:#F97316;--or2:#FB923C;--or3:#EA6A10;
+  --bg:#0E1117;--bg2:#161B24;
+  --text:#F0EDE8;--muted:#7A8899;--faint:#2E3848;
+  --border:rgba(249,115,22,0.22);--borderf:rgba(249,115,22,0.10);
+  --card:#131920;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 3rem;height:56px;
+  background:rgba(14,17,23,0.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(249,115,22,0.08);
+}
+.logo{font-family:'Playfair Display',serif;font-size:1.15rem;letter-spacing:1.5px;color:var(--text)}
+.logo b{color:var(--or)}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;transition:color .2s;margin-left:2rem}
+.nav-links a:hover{color:var(--or)}
+
+#hero{position:relative;height:100vh;overflow:hidden;background:var(--bg);cursor:default}
+
+#hero::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 40%, rgba(249,115,22,0.04) 0%, transparent 65%),
+    linear-gradient(to bottom, rgba(14,17,23,0.92) 0%, rgba(14,17,23,0) 15%,
+      rgba(14,17,23,0) 80%, rgba(14,17,23,0.96) 100%);
+}
+
+canvas#particle-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;}
+
+/* Central crystal glow — CSS only */
+.crystal-core{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:2;pointer-events:none;
+  width:200px;height:200px;
+}
+.crystal-core::before{
+  content:'';position:absolute;inset:0;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(249,115,22,0.13) 0%, rgba(249,115,22,0.04) 40%, transparent 70%);
+  animation:corePulse 3s ease-in-out infinite;
+}
+.crystal-core::after{
+  content:'';position:absolute;inset:30px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(249,115,22,0.22) 0%, rgba(249,115,22,0.05) 60%, transparent 100%);
+  animation:corePulse 3s ease-in-out infinite 0.5s;
+}
+@keyframes corePulse{
+  0%,100%{transform:scale(1);opacity:0.8;}
+  50%{transform:scale(1.15);opacity:1;}
+}
+
+/* Gem SVG at center */
+.gem-center{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:3;pointer-events:none;
+  width:96px;height:96px;
+  filter:drop-shadow(0 0 16px rgba(249,115,22,0.6)) drop-shadow(0 0 36px rgba(249,115,22,0.3));
+  animation:gemFloat 4s ease-in-out infinite;
+}
+@keyframes gemFloat{
+  0%,100%{transform:translate(-50%,-50%) translateY(0) rotate(0deg);}
+  50%{transform:translate(-50%,-50%) translateY(-8px) rotate(2deg);}
+}
+
+.hero-brand{
+  position:absolute;top:0;left:0;right:0;z-index:10;
+  display:flex;flex-direction:column;align-items:center;
+  padding-top:74px;pointer-events:none;
+}
+.hero-brand-name{
+  font-family:'Playfair Display',serif;
+  font-size:4.2rem;font-weight:700;letter-spacing:8px;
+  color:var(--text);line-height:1;
+  text-shadow:0 0 60px rgba(249,115,22,0.12);
+}
+.hero-brand-name b{color:var(--or);text-shadow:0 0 30px rgba(249,115,22,0.35)}
+.hero-brand-sub{
+  font-family:'DM Mono',monospace;font-size:0.63rem;
+  letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--muted);margin-top:0.65rem;
+}
+
+.edu-label{position:absolute;z-index:10;pointer-events:none;opacity:0;animation:fadeLabel 0.7s ease forwards;}
+.edu-box{
+  background:rgba(19,25,32,0.82);border:1px solid var(--border);border-radius:3px;
+  padding:0.45rem 0.78rem;backdrop-filter:blur(12px);
+  box-shadow:0 2px 20px rgba(0,0,0,0.4);white-space:nowrap;
+}
+.edu-key{font-family:'DM Mono',monospace;font-size:0.62rem;font-weight:500;color:var(--or2);letter-spacing:0.07em;display:block}
+.edu-val{font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--or3);display:block;margin-top:1px}
+.edu-desc{font-family:'DM Sans',sans-serif;font-size:0.67rem;color:var(--muted);display:block;margin-top:2px}
+@keyframes fadeLabel{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+.canvas-hint{
+  position:absolute;bottom:4.5rem;left:50%;transform:translateX(-50%);
+  z-index:10;pointer-events:none;
+  font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.16em;text-transform:uppercase;
+  color:rgba(122,136,153,0.45);white-space:nowrap;
+}
+.canvas-hint b{color:rgba(249,115,22,0.5)}
+
+.hero-stats{
+  position:absolute;bottom:0;left:0;right:0;z-index:10;
+  display:flex;justify-content:center;
+  border-top:1px solid rgba(249,115,22,0.08);
+  background:rgba(14,17,23,0.88);backdrop-filter:blur(10px);
+}
+.hstat{padding:0.85rem 2.5rem;text-align:center;border-right:1px solid rgba(249,115,22,0.08)}
+.hstat:last-child{border-right:none}
+.hstat-n{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--or);line-height:1;text-shadow:0 0 20px rgba(249,115,22,0.3)}
+.hstat-l{font-size:0.58rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:0.2rem;font-family:'DM Mono',monospace}
+
+.sec{padding:5rem 6rem;max-width:1200px;margin:0 auto}
+.sec-tag{font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--or);margin-bottom:0.7rem}
+.sec-h{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;line-height:1.2;margin-bottom:0.9rem;color:var(--text)}
+.sec-p{color:var(--muted);font-size:0.92rem;line-height:1.85;max-width:580px}
+
+.gen-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2.5rem}
+.gen-panel{background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;box-shadow:0 2px 24px rgba(0,0,0,0.3)}
+.panel-head{background:var(--bg2);border-bottom:1px solid var(--borderf);padding:0.85rem 1.4rem;display:flex;align-items:center;gap:0.55rem}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--or);flex-shrink:0;box-shadow:0 0 6px rgba(249,115,22,0.6)}
+.panel-title{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;color:var(--or);text-transform:uppercase}
+.panel-body{padding:1.6rem}
+.fg{display:flex;flex-direction:column;gap:0.3rem;margin-bottom:1rem}
+.fg label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)}
+.fg input,.fg textarea{
+  background:var(--bg);border:1px solid var(--borderf);
+  border-radius:4px;color:var(--text);font-size:0.85rem;padding:0.65rem 0.9rem;
+  outline:none;transition:border-color .2s;font-family:'DM Sans',sans-serif;resize:none;width:100%;
+}
+.fg input:focus,.fg textarea:focus{border-color:var(--or);box-shadow:0 0 0 2px rgba(249,115,22,0.08)}
+.fg input::placeholder,.fg textarea::placeholder{color:rgba(122,136,153,0.4)}
+.gen-btn{
+  width:100%;padding:0.85rem;margin-top:1rem;
+  background:var(--or);border:none;border-radius:4px;color:#fff;
+  font-size:0.76rem;font-weight:700;cursor:pointer;letter-spacing:0.12em;text-transform:uppercase;
+  font-family:'DM Sans',sans-serif;transition:background .2s,transform .1s,box-shadow .2s;
+  box-shadow:0 0 20px rgba(249,115,22,0.25);
+}
+.gen-btn:hover{background:var(--or3);transform:translateY(-1px);box-shadow:0 0 28px rgba(249,115,22,0.4)}
+.gen-btn:disabled{opacity:0.25;cursor:not-allowed;transform:none;box-shadow:none}
+.load-wrap{display:none;padding-top:1rem}
+.load-bar{width:100%;height:1px;background:var(--faint);margin-bottom:0.9rem}
+.load-fill{height:100%;width:0%;background:var(--or);transition:width .6s ease;box-shadow:0 0 6px rgba(249,115,22,0.6)}
+.load-steps{display:flex;gap:0.85rem;flex-wrap:wrap}
+.lstep{font-family:'DM Mono',monospace;font-size:0.62rem;color:rgba(122,136,153,0.35);letter-spacing:0.05em;transition:color .3s}
+.lstep.active{color:var(--or)}.lstep.done{color:var(--muted)}
+.out-panel{background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;display:none;box-shadow:0 2px 24px rgba(0,0,0,0.3)}
+.out-ph{display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed rgba(249,115,22,0.12);border-radius:6px;min-height:200px}
+.out-ph p{font-family:'DM Mono',monospace;font-size:0.63rem;color:rgba(122,136,153,0.4);letter-spacing:0.08em;text-align:center;line-height:2}
+.out-head{background:var(--bg2);border-bottom:1px solid var(--borderf);padding:0.85rem 1.4rem;display:flex;align-items:center;justify-content:space-between}
+.out-lbl{font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.1em;color:var(--or);text-transform:uppercase}
+.out-acts{display:flex;gap:0.4rem}
+.act{padding:0.28rem 0.8rem;border-radius:3px;font-size:0.62rem;font-weight:600;font-family:'DM Sans',sans-serif;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.act.cp{background:transparent;border:1px solid var(--border);color:var(--or)}
+.act.cp:hover{background:rgba(249,115,22,0.08)}
+.act.dl{background:var(--or);border:1px solid var(--or);color:#fff;box-shadow:0 0 12px rgba(249,115,22,0.3)}
+.act.dl:hover{background:var(--or3)}
+.cif-pre{padding:1.2rem 1.4rem;font-family:'DM Mono',monospace;font-size:0.7rem;color:#C4873A;line-height:1.8;max-height:400px;overflow-y:auto;background:var(--bg);white-space:pre}
+.viewer-panel{background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;display:none;box-shadow:0 2px 24px rgba(0,0,0,0.3);margin-top:1.5rem;grid-column:1/-1}
+.viewer-head{background:var(--bg2);border-bottom:1px solid var(--borderf);padding:0.85rem 1.4rem;display:flex;align-items:center;gap:0.55rem}
+#viewer-canvas{width:100%;height:340px;background:var(--bg);display:block;cursor:grab}
+#viewer-canvas:active{cursor:grabbing}
+.viewer-info{font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);padding:0.6rem 1.4rem;border-top:1px solid var(--borderf);letter-spacing:0.06em}
+.err-msg{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:4px;padding:0.6rem 0.9rem;font-family:'DM Mono',monospace;font-size:0.65rem;color:#f87171;margin-top:0.5rem;display:none}
+
+.about-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:2.5rem;background:rgba(249,115,22,0.08);border-radius:6px;overflow:hidden}
+.acard{background:var(--card);padding:1.8rem 1.5rem;transition:background .2s}
+.acard:hover{background:var(--bg2)}
+.an{font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--or);letter-spacing:0.1em;margin-bottom:0.7rem}
+.at{font-size:0.9rem;font-weight:600;margin-bottom:0.5rem;line-height:1.3;color:var(--text)}
+.ad{font-size:0.78rem;color:var(--muted);line-height:1.65}
+
+footer{border-top:1px solid rgba(249,115,22,0.08);text-align:center;padding:2rem;color:rgba(122,136,153,0.4);font-size:0.65rem;font-family:'DM Mono',monospace;letter-spacing:0.08em}
+footer b{color:var(--or)}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">CRYS<b>TEXT</b></div>
+  <div class="nav-links">
+    <a href="#hero">Crystal</a>
+    <a href="#generator">Generator</a>
+    <a href="#about">About</a>
+  </div>
+</nav>
+
+<section id="hero">
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Central VESTA-style crystal structure -->
+  <canvas id="crystal-canvas" class="gem-center" width="192" height="192" style="width:380px;height:380px;border-radius:50%;"></canvas>
+
+  <div class="hero-brand">
+    <div class="hero-brand-name">CRYS<b>TEXT</b></div>
+    <div class="hero-brand-sub">Text-conditioned crystal structure generation</div>
+  </div>
+
+  <div class="edu-label" style="top:22%;left:5%;animation-delay:1.0s">
+    <div class="edu-box">
+      <span class="edu-key">a = b = c = 5.640 Å</span>
+      <span class="edu-val">Lattice parameters</span>
+      <span class="edu-desc">FCC — all three axes equal</span>
+    </div>
+  </div>
+  <div class="edu-label" style="top:22%;right:5%;animation-delay:1.4s">
+    <div class="edu-box">
+      <span class="edu-key">Space Group: Fm-3m (225)</span>
+      <span class="edu-val">Symmetry operations</span>
+      <span class="edu-desc">Face-centred cubic symmetry</span>
+    </div>
+  </div>
+  <div class="edu-label" style="top:46%;left:3%;animation-delay:1.8s">
+    <div class="edu-box">
+      <span class="edu-key">Bond length: 2.820 Å</span>
+      <span class="edu-val">Na–Cl ionic bond</span>
+      <span class="edu-desc">Nearest-neighbour distance</span>
+    </div>
+  </div>
+  <div class="edu-label" style="top:46%;right:3%;animation-delay:2.2s">
+    <div class="edu-box">
+      <span class="edu-key">α = β = γ = 90°</span>
+      <span class="edu-val">Cell angles</span>
+      <span class="edu-desc">Cubic — all right angles</span>
+    </div>
+  </div>
+  <div class="edu-label" style="bottom:25%;left:5%;animation-delay:2.6s">
+    <div class="edu-box">
+      <span class="edu-key">Fractional coordinates</span>
+      <span class="edu-val">Na:(0,0,0) · Cl:(½,½,½)</span>
+      <span class="edu-desc">Atomic positions in unit cell</span>
+    </div>
+  </div>
+  <div class="edu-label" style="bottom:25%;right:5%;animation-delay:3.0s">
+    <div class="edu-box">
+      <span class="edu-key">→ CIF File</span>
+      <span class="edu-val">Crystallographic Information File</span>
+      <span class="edu-desc">All of the above — predicted by CrysText</span>
+    </div>
+  </div>
+
+  <div class="canvas-hint"><b>click</b> anywhere to create a shockwave</div>
+
+  <div class="hero-stats">
+    <div class="hstat"><div class="hstat-n">27K+</div><div class="hstat-l">Training structures</div></div>
+    <div class="hstat"><div class="hstat-n">100%</div><div class="hstat-l">Composition accuracy</div></div>
+    <div class="hstat"><div class="hstat-n">7B</div><div class="hstat-l">Parameters</div></div>
+    <div class="hstat"><div class="hstat-n">MP-20</div><div class="hstat-l">Benchmark dataset</div></div>
+  </div>
+</section>
+
+<section id="generator" class="sec">
+  <div class="sec-tag">Structure Generator</div>
+  <h2 class="sec-h">Describe your material, receive a CIF file</h2>
+  <p class="sec-p">Enter a chemical formula, space group number, and a natural language description. CrysText generates a downloadable CIF file ready for VESTA or pymatgen.</p>
+  <div class="gen-grid">
+    <!-- LEFT: Input panel -->
+    <div class="gen-panel" style="grid-column:1">
+      <div class="panel-head"><div class="dot"></div><div class="panel-title">Input · Material Description</div></div>
+      <div class="panel-body">
+        <div class="fg"><label>Chemical Formula</label><input type="text" id="formula" placeholder="e.g. NaCl, Fe2O3, BaTiO3"></div>
+        <div class="fg"><label>Space Group Number (1–230)</label><input type="number" id="spacegroup" placeholder="e.g. 225, 62, 12" min="1" max="230"></div>
+        <div class="err-msg" id="errMsg"></div>
+        <div class="fg"><label>Natural Language Description</label><textarea id="desc" rows="3" placeholder="e.g. Rock salt structure with face-centred cubic symmetry..."></textarea></div>
+        <button class="gen-btn" id="genBtn" onclick="runGen()">Generate CIF Structure</button>
+        <div class="load-wrap" id="loadWrap">
+          <div class="load-bar"><div class="load-fill" id="loadFill"></div></div>
+          <div class="load-steps">
+            <span class="lstep" id="ls0">Tokenizing</span>
+            <span class="lstep" id="ls1">Inference</span>
+            <span class="lstep" id="ls2">Coordinates</span>
+            <span class="lstep" id="ls3">Lattice</span>
+            <span class="lstep" id="ls4">Validating</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: CIF output panel -->
+    <div class="out-panel" id="outPanel" style="grid-column:2">
+      <div class="out-head">
+        <span class="out-lbl">Generated CIF · Output</span>
+        <div class="out-acts">
+          <button class="act cp" onclick="copyCIF()">Copy</button>
+          <button class="act dl" onclick="dlCIF()">Download .cif</button>
+        </div>
+      </div>
+      <div class="cif-pre" id="cifOut"></div>
+    </div>
+
+    <!-- RIGHT placeholder before generation -->
+    <div class="out-ph" id="outPH" style="grid-column:2">
+      <p>CIF output will appear here<br>Fill the form and click Generate</p>
+    </div>
+
+    <!-- FULL WIDTH: 3D viewer below both panels -->
+    <div class="viewer-panel" id="viewerPanel" style="grid-column:1/-1;margin-top:1rem">
+      <div class="viewer-head"><div class="dot"></div><div class="panel-title">3D Structure Viewer · Interactive · Drag to rotate · Scroll to zoom</div></div>
+      <canvas id="viewer-canvas" style="width:100%;height:380px;display:block;cursor:grab;background:#0E1117"></canvas>
+      <div class="viewer-info" id="viewerInfo" style="font-family:'DM Mono',monospace;font-size:0.6rem;color:#7A8899;padding:0.6rem 1.4rem;border-top:1px solid rgba(249,115,22,0.1);letter-spacing:0.06em"></div>
+    </div>
+  </div>
+</section>
+
+<section id="about" class="sec">
+  <div class="sec-tag">What is CrysText</div>
+  <h2 class="sec-h">Crystal prediction, reimagined with language</h2>
+  <p class="sec-p">Traditional crystal structure prediction requires expensive DFT calculations and deep domain expertise. CrysText replaces that with a single natural language prompt.</p>
+  <div class="about-grid">
+    <div class="acard"><div class="an">01 ·</div><div class="at">Text-conditioned generation</div><div class="ad">Describe any material in plain English. The model generates lattice parameters, space group, and atom coordinates automatically.</div></div>
+    <div class="acard"><div class="an">02 ·</div><div class="at">Fine-tuned Mistral-7B</div><div class="ad">Built on Mistral-7B-v0.3 with QLoRA (r=16), trained on the full MP-20 benchmark of 27,136 real crystal structures.</div></div>
+    <div class="acard"><div class="an">03 ·</div><div class="at">Standard CIF output</div><div class="ad">Outputs industry-standard CIF files directly importable into VESTA, Materials Studio, or pymatgen.</div></div>
+    <div class="acard"><div class="an">04 ·</div><div class="at">Materials informatics</div><div class="ad">Part of the push to accelerate materials discovery using AI — faster and more accessible than classical DFT methods.</div></div>
+  </div>
+</section>
+
+<footer>CRYSTEXT &nbsp;·&nbsp; Materials Informatics Project &nbsp;·&nbsp; Mistral-7B + QLoRA</footer>
+
+<script>
+/* ═══════════════════════════════════════
+   MAGNETIC PARTICLE FIELD
+   700 particles orbit the central crystal
+   Cursor repels nearby particles like a magnet
+   Click = shockwave explosion + reform
+   Particles: 3 types — orange, indigo, dim
+   Each has own orbit radius, drift, speed
+═══════════════════════════════════════ */
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+
+let W, H, cx, cy;
+function resize(){
+  const hero = document.getElementById('hero');
+  W = canvas.width  = hero.clientWidth;
+  H = canvas.height = hero.clientHeight;
+  cx = W/2; cy = H/2;
+}
+resize(); window.addEventListener('resize', resize);
+
+// Mouse
+let mx = -9999, my = -9999;
+document.getElementById('hero').addEventListener('mousemove', e=>{
+  const r = canvas.getBoundingClientRect();
+  mx = e.clientX - r.left;
+  my = e.clientY - r.top;
+});
+document.getElementById('hero').addEventListener('mouseleave', ()=>{ mx=-9999; my=-9999; });
+
+// Click shockwave
+let shockX=0, shockY=0, shockR=0, shockAlpha=0;
+document.getElementById('hero').addEventListener('click', e=>{
+  const r=canvas.getBoundingClientRect();
+  shockX=e.clientX-r.left; shockY=e.clientY-r.top;
+  shockR=0; shockAlpha=1;
+  // Explode nearby particles
+  particles.forEach(p=>{
+    const dx=p.x-shockX, dy=p.y-shockY;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<180){
+      const force=(180-dist)/180*12;
+      p.vx+=(dx/dist)*force;
+      p.vy+=(dy/dist)*force;
+    }
+  });
+});
+
+// Particle types
+const TYPES = [
+  { color:'rgba(249,115,22,', size:1.8, speed:0.00035, orbitScale:1.0 },  // orange
+  { color:'rgba(129,140,248,', size:1.4, speed:0.00028, orbitScale:0.75 }, // indigo
+  { color:'rgba(100,116,139,', size:1.1, speed:0.00042, orbitScale:1.25 }, // slate
+];
+
+const N = 700;
+const particles = Array.from({length:N}, (_, i) => {
+  const typeIdx = i < 280 ? 0 : i < 490 ? 1 : 2;
+  const type = TYPES[typeIdx];
+  // Orbital initial position — spread in rings around center
+  const angle = Math.random() * Math.PI * 2;
+  const orbitR = (80 + Math.random() * 340) * type.orbitScale;
+  return {
+    typeIdx,
+    // Home position (on orbit)
+    homeAngle: angle,
+    homeR: orbitR,
+    // Current position
+    x: cx + Math.cos(angle) * orbitR,
+    y: cy + Math.sin(angle) * orbitR,
+    // Velocity
+    vx: 0, vy: 0,
+    // Drift angle for slow orbit
+    driftAngle: angle,
+    driftSpeed: (Math.random() > 0.5 ? 1 : -1) * type.speed * (0.7 + Math.random() * 0.6),
+    // Base opacity
+    baseAlpha: 0.35 + Math.random() * 0.5,
+    // Phase for twinkle
+    phase: Math.random() * Math.PI * 2,
+    size: type.size * (0.7 + Math.random() * 0.6),
+  };
+});
+
+const REPEL_RADIUS = 130;
+const REPEL_FORCE  = 5.5;
+const RETURN_FORCE = 0.022;
+const DAMPING      = 0.88;
+const CORE_RADIUS  = 105; // particles don't enter this
+
+let frame = 0;
+function animate(){
+  requestAnimationFrame(animate);
+  frame++;
+  const t = frame * 0.012;
+
+  // Clear with slight trail fade for motion blur feel
+  ctx.fillStyle = 'rgba(14,17,23,0.38)';
+  ctx.fillRect(0,0,W,H);
+
+  // Shockwave ring
+  if(shockAlpha > 0){
+    shockR += 8;
+    shockAlpha -= 0.022;
+    ctx.beginPath();
+    ctx.arc(shockX, shockY, shockR, 0, Math.PI*2);
+    ctx.strokeStyle = `rgba(249,115,22,${shockAlpha * 0.6})`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // Second ring slightly behind
+    ctx.beginPath();
+    ctx.arc(shockX, shockY, shockR*0.7, 0, Math.PI*2);
+    ctx.strokeStyle = `rgba(249,115,22,${shockAlpha * 0.3})`;
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+  }
+
+  particles.forEach(p => {
+    const type = TYPES[p.typeIdx];
+
+    // Slow orbit drift — update home position
+    p.driftAngle += p.driftSpeed;
+    const homeX = cx + Math.cos(p.driftAngle) * p.homeR;
+    const homeY = cy + Math.sin(p.driftAngle) * p.homeR;
+
+    // Spring return toward home
+    const dxH = homeX - p.x;
+    const dyH = homeY - p.y;
+    p.vx += dxH * RETURN_FORCE;
+    p.vy += dyH * RETURN_FORCE;
+
+    // Damping
+    p.vx *= DAMPING;
+    p.vy *= DAMPING;
+
+    // Move
+    p.x += p.vx;
+    p.y += p.vy;
+
+    // Keep within hero bounds loosely
+    if(p.x < 0) p.vx += 0.5;
+    if(p.x > W) p.vx -= 0.5;
+    if(p.y < 0) p.vy += 0.5;
+    if(p.y > H) p.vy -= 0.5;
+
+    // Draw particle
+    const speed = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
+    const twinkle = 0.6 + 0.4*Math.sin(t*2.5 + p.phase);
+    const alpha = Math.min(1, p.baseAlpha * twinkle * (1 + speed*0.08));
+
+    // Elongate fast-moving particles (motion streak)
+    if(speed > 1.2){
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(Math.atan2(p.vy, p.vx));
+      ctx.beginPath();
+      ctx.ellipse(0, 0, Math.min(p.size + speed*0.6, 8), p.size*0.5, 0, 0, Math.PI*2);
+      ctx.fillStyle = `${type.color}${alpha})`;
+      ctx.fill();
+      ctx.restore();
+    } else {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+      ctx.fillStyle = `${type.color}${alpha})`;
+      ctx.fill();
+    }
+
+    // Glow halo for orange particles when fast
+    if(p.typeIdx === 0 && speed > 2){
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size*3, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(249,115,22,${alpha*0.08})`;
+      ctx.fill();
+    }
+  });
+
+}
+animate();
+
+/* ═══ CLEAN NaCl UNIT CELL ═══ */
+(function(){
+  const cc = document.getElementById('crystal-canvas');
+  const cx2 = cc.getContext('2d');
+  const S = 500;
+  cc.width = S; cc.height = S;
+  const half = S / 2;
+  let angle = 0;
+
+  // NaCl FCC unit cell — exact positions
+  // Na at corners + face centres (even parity)
+  // Cl at edge centres + body centre (odd parity)
+  const lattice = [
+    // 8 corners — alternating Na/Cl
+    {fx:-0.5,fy:-0.5,fz:-0.5,type:'Na'},
+    {fx: 0.5,fy:-0.5,fz:-0.5,type:'Cl'},
+    {fx:-0.5,fy: 0.5,fz:-0.5,type:'Cl'},
+    {fx: 0.5,fy: 0.5,fz:-0.5,type:'Na'},
+    {fx:-0.5,fy:-0.5,fz: 0.5,type:'Cl'},
+    {fx: 0.5,fy:-0.5,fz: 0.5,type:'Na'},
+    {fx:-0.5,fy: 0.5,fz: 0.5,type:'Na'},
+    {fx: 0.5,fy: 0.5,fz: 0.5,type:'Cl'},
+    // 6 face centres
+    {fx: 0.5,fy: 0,  fz: 0,  type:'Na'},
+    {fx:-0.5,fy: 0,  fz: 0,  type:'Na'},
+    {fx: 0,  fy: 0.5,fz: 0,  type:'Na'},
+    {fx: 0,  fy:-0.5,fz: 0,  type:'Na'},
+    {fx: 0,  fy: 0,  fz: 0.5,type:'Na'},
+    {fx: 0,  fy: 0,  fz:-0.5,type:'Na'},
+    // edge midpoints (Cl)
+    {fx: 0,  fy:-0.5,fz:-0.5,type:'Cl'},
+    {fx: 0,  fy: 0.5,fz:-0.5,type:'Cl'},
+    {fx: 0,  fy:-0.5,fz: 0.5,type:'Cl'},
+    {fx: 0,  fy: 0.5,fz: 0.5,type:'Cl'},
+    {fx:-0.5,fy: 0,  fz:-0.5,type:'Cl'},
+    {fx: 0.5,fy: 0,  fz:-0.5,type:'Cl'},
+    {fx:-0.5,fy: 0,  fz: 0.5,type:'Cl'},
+    {fx: 0.5,fy: 0,  fz: 0.5,type:'Cl'},
+    {fx:-0.5,fy:-0.5,fz: 0,  type:'Cl'},
+    {fx: 0.5,fy:-0.5,fz: 0,  type:'Cl'},
+    {fx:-0.5,fy: 0.5,fz: 0,  type:'Cl'},
+    {fx: 0.5,fy: 0.5,fz: 0,  type:'Cl'},
+    // body centre
+    {fx: 0,  fy: 0,  fz: 0,  type:'Cl'},
+  ];
+
+  // Bonds — connect Na to Cl only if distance = 0.5
+  const bonds = [];
+  for(let i=0;i<lattice.length;i++) for(let j=i+1;j<lattice.length;j++){
+    if(lattice[i].type===lattice[j].type) continue;
+    const a=lattice[i],b=lattice[j];
+    const d2=(a.fx-b.fx)**2+(a.fy-b.fy)**2+(a.fz-b.fz)**2;
+    if(Math.abs(d2-0.25)<0.01) bonds.push([i,j]);
+  }
+
+  const SCALE = 170;
+  const TILT  = 0.38;
+
+  function project(fx,fy,fz,rot){
+    const cosA=Math.cos(rot),sinA=Math.sin(rot);
+    const rx=fx*cosA-fz*sinA, ry=fy, rz=fx*sinA+fz*cosA;
+    const cosT=Math.cos(TILT),sinT=Math.sin(TILT);
+    const ty=ry*cosT-rz*sinT, tz=ry*sinT+rz*cosT;
+    const p=1+tz*0.18;
+    return {sx:half+rx*SCALE*p, sy:half+ty*SCALE*p, depth:tz, persp:p};
+  }
+
+  function drawSphere(x,y,r,isNa){
+    const hx=x-r*0.32, hy=y-r*0.36;
+    // sphere body
+    const sph=cx2.createRadialGradient(hx,hy,r*0.02,x,y,r);
+    if(isNa){
+      sph.addColorStop(0,'rgba(255,225,160,1)');
+      sph.addColorStop(0.28,'rgba(251,146,60,1)');
+      sph.addColorStop(0.7,'rgba(220,80,10,1)');
+      sph.addColorStop(1,'rgba(100,30,2,1)');
+    } else {
+      sph.addColorStop(0,'rgba(220,222,255,1)');
+      sph.addColorStop(0.28,'rgba(139,148,255,1)');
+      sph.addColorStop(0.7,'rgba(79,70,229,1)');
+      sph.addColorStop(1,'rgba(25,18,85,1)');
+    }
+    cx2.beginPath(); cx2.arc(x,y,r,0,Math.PI*2);
+    cx2.fillStyle=sph; cx2.fill();
+    // specular
+    const sp=cx2.createRadialGradient(hx,hy,0,hx,hy,r*0.4);
+    sp.addColorStop(0,'rgba(255,255,255,0.88)');
+    sp.addColorStop(0.5,'rgba(255,255,255,0.2)');
+    sp.addColorStop(1,'rgba(255,255,255,0)');
+    cx2.beginPath(); cx2.arc(hx,hy,r*0.4,0,Math.PI*2);
+    cx2.fillStyle=sp; cx2.fill();
+    // rim
+    cx2.beginPath(); cx2.arc(x,y,r,0,Math.PI*2);
+    cx2.strokeStyle=isNa?'rgba(150,50,3,0.5)':'rgba(45,30,140,0.5)';
+    cx2.lineWidth=1; cx2.stroke();
+  }
+
+  function drawFrame(){
+    cx2.clearRect(0,0,S,S);
+    const proj=lattice.map(a=>({...a,...project(a.fx,a.fy,a.fz,angle)}));
+    const sorted=[...proj].sort((a,b)=>a.depth-b.depth);
+
+    // bonds
+    for(const [i,j] of bonds){
+      const a=proj[i],b=proj[j];
+      const g=cx2.createLinearGradient(a.sx,a.sy,b.sx,b.sy);
+      g.addColorStop(0,a.type==='Na'?'rgba(249,115,22,0.5)':'rgba(110,118,245,0.5)');
+      g.addColorStop(1,b.type==='Na'?'rgba(249,115,22,0.5)':'rgba(110,118,245,0.5)');
+      cx2.beginPath(); cx2.moveTo(a.sx,a.sy); cx2.lineTo(b.sx,b.sy);
+      cx2.strokeStyle=g; cx2.lineWidth=2; cx2.stroke();
+    }
+
+    // atoms
+    for(const atom of sorted){
+      const isNa=atom.type==='Na';
+      // corner/edge atoms slightly smaller than face/body
+      const isCorner=Math.abs(atom.fx)===0.5&&Math.abs(atom.fy)===0.5&&Math.abs(atom.fz)===0.5;
+      const r=(isNa?18:15)*atom.persp;
+      drawSphere(atom.sx,atom.sy,r,isNa);
+    }
+
+    angle+=0.0008;
+    requestAnimationFrame(drawFrame);
+  }
+  drawFrame();
+})();
+
+/* ═══ GENERATOR ═══ */
+let curF='structure';
+
+/* ═══ INPUT VALIDATION ═══ */
+function showErr(msg){
+  const e=document.getElementById('errMsg');
+  e.textContent=msg; e.style.display='block';
+}
+function clearErr(){
+  document.getElementById('errMsg').style.display='none';
+}
+
+// Basic element checker — catches garbage like random strings
+const VALID_ELEMENTS = new Set([
+  'H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar',
+  'K','Ca','Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br',
+  'Kr','Rb','Sr','Y','Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd','In','Sn','Sb','Te',
+  'I','Xe','Cs','Ba','La','Ce','Pr','Nd','Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm',
+  'Yb','Lu','Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po','At','Rn',
+  'Fr','Ra','Ac','Th','Pa','U','Np','Pu','Am','Cm','Bk','Cf','Es','Fm','Md','No','Lr'
+]);
+
+function validateFormula(formula) {
+  // Extract all element symbols (capital letter optionally followed by lowercase)
+  const tokens = formula.match(/[A-Z][a-z]?/g);
+  if (!tokens || tokens.length === 0) return false;
+  for (const t of tokens) {
+    if (!VALID_ELEMENTS.has(t)) return false;
+  }
+  return true;
+}
+
+async function runGen(){
+  clearErr();
+  const f=document.getElementById('formula').value.trim();
+  const sgRaw=document.getElementById('spacegroup').value.trim();
+
+  // Validate formula
+  if(!f){ showErr('Please enter a chemical formula.'); return; }
+  if(!validateFormula(f)){
+    showErr(`"${f}" contains invalid element symbols. Please check your formula.`);
+    return;
+  }
+
+  // Validate space group 1-230
+  const sg = parseInt(sgRaw);
+  if(!sgRaw || isNaN(sg) || sg < 1 || sg > 230){
+    showErr('Space group must be a number between 1 and 230.');
+    return;
+  }
+
+  curF=f||'structure';
+  document.getElementById('genBtn').disabled=true;
+  document.getElementById('loadWrap').style.display='block';
+  document.getElementById('outPanel').style.display='none';
+  document.getElementById('outPH').style.display='none';
+  document.getElementById('viewerPanel').style.display='none';
+  ['ls0','ls1','ls2','ls3','ls4'].forEach(s=>document.getElementById(s).className='lstep');
+  const fill=document.getElementById('loadFill');fill.style.width='0%';
+
+  let step=0;
+  const iv=setInterval(()=>{
+    if(step>0)document.getElementById('ls'+(step-1)).className='lstep done';
+    if(step<5)document.getElementById('ls'+step).className='lstep active';
+    fill.style.width=((step+1)/5*80)+'%';
+    step++;if(step>=5)clearInterval(iv);
+  },6000);
+
+  try {
+    const resp = await fetch('http://localhost:5000/generate', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({formula: f, spacegroup: String(sg)})
+    });
+    clearInterval(iv);
+    if(!resp.ok){
+      const err = await resp.json();
+      throw new Error(err.error || 'Server error');
+    }
+    const data = await resp.json();
+    fill.style.width='100%';
+    ['ls0','ls1','ls2','ls3','ls4'].forEach(s=>document.getElementById(s).className='lstep done');
+
+    const v = data.validation;
+    let header = '';
+    if(v.valid){
+      const conf = v.confidence || 0;
+      const confBar = '█'.repeat(Math.round(conf/10)) + '░'.repeat(10-Math.round(conf/10));
+      header += `; ╔══════════════════════════════════════╗\n`;
+      header += `; ║        CrysText Validation Report        ║\n`;
+      header += `; ╚══════════════════════════════════════╝\n`;
+      header += `; Pymatgen Parse     : VALID ✓\n`;
+      header += `; Composition Match  : ${v.composition_match ? 'YES ✓' : 'NO ✗  — check formula'}\n`;
+      header += `; Space Group Match  : ${v.spacegroup_match ? 'YES ✓' : 'NO ✗  — model partial (10k training)'}\n`;
+      header += `; Requested SG       : ${v.expected_spacegroup || '?'}\n`;
+      header += `; Detected SG        : ${v.detected_spacegroup || '?'}\n`;
+      header += `; Density            : ${v.density ? v.density + ' g/cm³ ' + (v.density_ok ? '✓' : '✗ unphysical') : 'N/A'}\n`;
+      header += `; Confidence Score   : ${conf}/100  [${confBar}]\n`;
+      header += `; ──────────────────────────────────────────\n`;
+    } else {
+      header += `; CrysText generated — Pymatgen: ${v.error||'parse issue'}\n`;
+      header += `; Confidence Score   : 0/100\n`;
+      header += `; Note: CIF may still be structurally meaningful\n`;
+      header += `; ──────────────────────────────────────────\n`;
+    }
+
+    setTimeout(()=>{
+      document.getElementById('loadWrap').style.display='none';
+      document.getElementById('genBtn').disabled=false;
+      document.getElementById('cifOut').textContent = header + data.cif;
+      document.getElementById('outPH').style.display='none';
+      document.getElementById('outPanel').style.display='block';
+
+      // Launch 3D viewer if valid
+      if(v.valid && data.cif){
+        try { launch3DViewer(data.cif, f, v); } catch(e){ console.warn('3D viewer error:', e); }
+      }
+    }, 400);
+
+  } catch(e) {
+    clearInterval(iv);
+    document.getElementById('loadWrap').style.display='none';
+    document.getElementById('genBtn').disabled=false;
+    document.getElementById('outPH').style.display='flex';
+    showErr('Error: ' + e.message + ' — Make sure app.py is running on localhost:5000');
+  }
+}
+
+/* SUPERCELL 3D VIEWER */
+function launch3DViewer(cifText, formula, validation) {
+  const panel = document.getElementById('viewerPanel');
+  const canvas = document.getElementById('viewer-canvas');
+  const info = document.getElementById('viewerInfo');
+  panel.style.display = 'block';
+
+  const atoms = parseCIFAtoms(cifText);
+  if(!atoms || atoms.length === 0){ panel.style.display='none'; return; }
+
+  const EL_COLORS = {
+    Na:'#FB923C',Cl:'#818CF8',Ti:'#60A5FA',O:'#F87171',Fe:'#A78BFA',
+    Ba:'#34D399',Ca:'#FBBF24',K:'#F472B6',Li:'#67E8F9',Mg:'#86EFAC',
+    Al:'#FCA5A5',Si:'#A5F3FC',S:'#FEF08A',N:'#93C5FD',H:'#E5E7EB',
+    Cu:'#F97316',Zn:'#A3E635',Ga:'#C4B5FD',As:'#6EE7B7',Bi:'#FB7185',
+    Pb:'#94A3B8',Sn:'#FCD34D',Ge:'#6EE7B7',default:'#94A3B8'
+  };
+  const EL_RADII = {
+    Na:1.02,Cl:0.99,O:0.73,Ti:0.86,Fe:0.78,Ba:1.35,Ca:1.14,
+    K:1.33,Li:0.76,Mg:0.86,Al:0.68,Si:0.54,H:0.31,default:0.85
+  };
+
+  // Build 2x2x2 supercell centered at origin
+  const supercell = [];
+  for(let ix=0;ix<2;ix++)
+    for(let iy=0;iy<2;iy++)
+      for(let iz=0;iz<2;iz++)
+        for(const a of atoms)
+          supercell.push({element:a.element, x:(a.x+ix)-0.5, y:(a.y+iy)-0.5, z:(a.z+iz)-0.5});
+
+  const SF = 2.4;
+  const sc = supercell.map(a=>({...a,x:a.x*SF,y:a.y*SF,z:a.z*SF}));
+
+  // Precompute bonds
+  const bonds = [];
+  for(let i=0;i<sc.length;i++)
+    for(let j=i+1;j<sc.length;j++){
+      const a=sc[i],b=sc[j];
+      const d=Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2+(a.z-b.z)**2);
+      const thresh=((EL_RADII[a.element]||0.85)+(EL_RADII[b.element]||0.85))*1.1;
+      if(d<thresh) bonds.push([i,j]);
+    }
+
+  info.textContent = sc.length+' atoms · '+bonds.length+' bonds · 2×2×2 supercell · SG: '+(validation.detected_spacegroup||'?')+' · '+formula;
+
+  const W=canvas.offsetWidth||900, H=380;
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  let rotX=0.4,rotY=0.5,zoom=1.0,dragging=false,lastX=0,lastY=0;
+  let alive=true;
+  if(canvas._kill) canvas._kill();
+  canvas._kill=()=>{alive=false;};
+
+  canvas.onmousedown=e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;};
+  window.onmouseup=()=>dragging=false;
+  window.onmousemove=e=>{if(!dragging)return;rotY+=(e.clientX-lastX)*0.008;rotX+=(e.clientY-lastY)*0.008;lastX=e.clientX;lastY=e.clientY;};
+  canvas.onwheel=e=>{zoom*=e.deltaY>0?0.93:1.08;zoom=Math.max(0.2,Math.min(5,zoom));e.preventDefault();};
+
+  function proj(x,y,z){
+    const cy=Math.cos(rotY),sy=Math.sin(rotY);
+    const rx=x*cy+z*sy,rz=-x*sy+z*cy;
+    const cx=Math.cos(rotX),sx=Math.sin(rotX);
+    const ry=y*cx-rz*sx,rz2=y*sx+rz*cx;
+    const P=6/(6+rz2);
+    const S=Math.min(W,H)*0.3*zoom;
+    return {sx:W/2+rx*S*P,sy:H/2+ry*S*P,depth:rz2,P};
+  }
+
+  function sphere(sx,sy,r,col){
+    const g=ctx.createRadialGradient(sx-r*0.32,sy-r*0.35,r*0.02,sx,sy,r);
+    g.addColorStop(0,'rgba(255,255,255,0.95)');
+    g.addColorStop(0.18,col);
+    g.addColorStop(0.65,col+'bb');
+    g.addColorStop(1,col+'22');
+    ctx.beginPath();ctx.arc(sx,sy,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    ctx.strokeStyle=col+'44';ctx.lineWidth=0.7;ctx.stroke();
+  }
+
+  function frame(){
+    if(!alive)return;
+    ctx.fillStyle='#0E1117';ctx.fillRect(0,0,W,H);
+    if(!dragging)rotY+=0.004;
+
+    const pr=sc.map(a=>({...a,...proj(a.x,a.y,a.z)}));
+    const order=pr.map((_,i)=>i).sort((a,b)=>pr[a].depth-pr[b].depth);
+
+    // Bonds
+    for(const[i,j]of bonds){
+      const a=pr[i],b=pr[j];
+      if(a.P<0.05||b.P<0.05)continue;
+      const mx=(a.sx+b.sx)/2,my=(a.sy+b.sy)/2;
+      const lw=Math.max(1,2.8*Math.min(a.P,b.P)*zoom);
+      ctx.lineWidth=lw;
+      ctx.beginPath();ctx.moveTo(a.sx,a.sy);ctx.lineTo(mx,my);
+      ctx.strokeStyle=(EL_COLORS[a.element]||EL_COLORS.default)+'88';ctx.stroke();
+      ctx.beginPath();ctx.moveTo(mx,my);ctx.lineTo(b.sx,b.sy);
+      ctx.strokeStyle=(EL_COLORS[b.element]||EL_COLORS.default)+'88';ctx.stroke();
+    }
+
+    // Atoms
+    for(const i of order){
+      const a=pr[i];
+      if(a.P<0.05)continue;
+      const col=EL_COLORS[a.element]||EL_COLORS.default;
+      const r=Math.max(4,(EL_RADII[a.element]||0.85)*20*a.P*zoom);
+      sphere(a.sx,a.sy,r,col);
+      if(r>9){
+        ctx.fillStyle='#fff';
+        ctx.font='bold '+Math.round(r*0.62)+'px DM Sans,sans-serif';
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(a.element,a.sx,a.sy);
+      }
+    }
+
+    // Legend bottom left
+    const els=[...new Set(sc.map(a=>a.element))];
+    let lx=14;
+    ctx.font='11px DM Mono,monospace';
+    for(const el of els){
+      const c=EL_COLORS[el]||EL_COLORS.default;
+      ctx.beginPath();ctx.arc(lx+6,H-14,6,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();
+      ctx.fillStyle='#7A8899';ctx.textAlign='left';ctx.textBaseline='middle';
+      ctx.fillText(el,lx+16,H-14);
+      lx+=ctx.measureText(el).width+30;
+    }
+
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function parseCIFAtoms(cif){
+  const atoms=[];
+  const lines=cif.split('\n');
+  let xIdx=-1,yIdx=-1,zIdx=-1,elIdx=-1,labelIdx=-1,headers=[],inAtom=false;
+  for(let i=0;i<lines.length;i++){
+    const l=lines[i].trim();
+    if(l==='loop_'){headers=[];xIdx=-1;yIdx=-1;zIdx=-1;elIdx=-1;labelIdx=-1;inAtom=false;continue;}
+    if(l.startsWith('_atom_site_')){
+      headers.push(l);inAtom=true;
+      if(l==='_atom_site_fract_x')xIdx=headers.length-1;
+      if(l==='_atom_site_fract_y')yIdx=headers.length-1;
+      if(l==='_atom_site_fract_z')zIdx=headers.length-1;
+      if(l==='_atom_site_type_symbol')elIdx=headers.length-1;
+      if(l==='_atom_site_label')labelIdx=headers.length-1;
+      continue;
+    }
+    if(inAtom&&xIdx>=0&&l.length>0&&!l.startsWith('_')&&!l.startsWith('loop_')&&!l.startsWith('data_')){
+      const p=l.split(/\s+/);
+      if(p.length>Math.max(xIdx,yIdx,zIdx)){
+        let el=elIdx>=0?p[elIdx]:(labelIdx>=0?p[labelIdx].replace(/[0-9+\-]/g,''):'X');
+        el=el.charAt(0).toUpperCase()+el.slice(1).toLowerCase();
+        const x=parseFloat(p[xIdx]),y=parseFloat(p[yIdx]),z=parseFloat(p[zIdx]);
+        if(!isNaN(x)&&!isNaN(y)&&!isNaN(z))atoms.push({element:el,x,y,z});
+      }
+    }
+    if(inAtom&&xIdx>=0&&(l.startsWith('loop_')||l.startsWith('_cell')||l.startsWith('_symmetry')||l.startsWith('data_')))inAtom=false;
+  }
+  return atoms;
+}
+
+function copyCIF(){
+  navigator.clipboard.writeText(document.getElementById('cifOut').textContent).then(()=>{
+    const b=document.querySelector('.act.cp');b.textContent='Copied!';
+    setTimeout(()=>b.textContent='Copy',1500);
+  });
+}
+function dlCIF(){
+  const blob=new Blob([document.getElementById('cifOut').textContent],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=curF+'.cif';a.click();
+}</script>
+</body>
+</html>

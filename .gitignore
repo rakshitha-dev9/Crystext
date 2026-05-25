@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+
+# Model cache (do not push model weights to Git)
+*.bin
+*.safetensors
+*.pt
+*.pth
+
+# HuggingFace cache
+.cache/
+
+# Kaggle
+*.json
+!package.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Logs
+*.log
