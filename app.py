@@ -18,7 +18,8 @@ app = Flask(__name__)
 CORS(app)
 
 BASE_MODEL_ID = "mistralai/Mistral-7B-v0.3"
-LORA_MODEL_ID = "rakshitha9/crystext-mistral-10k"
+#LORA_MODEL_ID = "rakshitha9/crystext-mistral-10k"
+LORA_MODEL_ID = "Charanya-2026/crystext-mistral-27k"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 print(f"\n{'='*50}")
