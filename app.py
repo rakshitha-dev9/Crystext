@@ -18,8 +18,7 @@ app = Flask(__name__)
 CORS(app)
 
 BASE_MODEL_ID = "mistralai/Mistral-7B-v0.3"
-#LORA_MODEL_ID = "rakshitha9/crystext-mistral-10k"
-LORA_MODEL_ID = "Charanya-2026/crystext-mistral-27k"
+LORA_MODEL_ID = "rakshitha9/crystext-mistral-10k"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 print(f"\n{'='*50}")
@@ -46,7 +45,7 @@ base_model = AutoModelForCausalLM.from_pretrained(
     BASE_MODEL_ID,
     quantization_config=bnb_config,
     device_map="auto",
-    #dtype=torch.float16,
+    dtype=torch.float16,
 )
 print("✅ Base model loaded")
 
@@ -193,6 +192,77 @@ def generate():
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"status": "ok", "device": DEVICE})
+
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    try:
+        import urllib.request
+        import json as json_lib
+
+        data = request.get_json()
+        messages = data.get('messages', [])
+        api_key = data.get('api_key', '')
+
+        if not api_key:
+            return jsonify({"error": "API key missing"}), 400
+        if not messages:
+            return jsonify({"error": "No messages provided"}), 400
+
+        SYSTEM_PROMPT = """You are a specialized materials science assistant embedded in CrysText, an AI tool for crystal structure generation. You ONLY answer questions related to:
+- Crystal structures, crystallography, and CIF files
+- Space groups and symmetry
+- Materials science concepts (band gaps, lattice parameters, unit cells, etc.)
+- The MP-20 dataset and Materials Project
+- Common materials like NaCl, GaAs, BaTiO3, TiO2, Fe2O3, MgO
+- QLoRA, fine-tuning, and how CrysText works
+- DFT (Density Functional Theory) basics
+- Indian materials science applications and research
+
+If asked anything outside materials science, politely say: "I'm specialized in materials science only. Please ask me about crystal structures, space groups, or materials!"
+
+Keep answers clear, concise, and friendly. Use simple language for non-experts."""
+
+        # Convert messages to Gemini format
+        gemini_contents = []
+        for msg in messages:
+            role = 'user' if msg['role'] == 'user' else 'model'
+            gemini_contents.append({
+                'role': role,
+                'parts': [{'text': msg['content']}]
+            })
+
+        payload = json_lib.dumps({
+            "system_instruction": {"parts": [{"text": SYSTEM_PROMPT}]},
+            "contents": gemini_contents,
+            "generationConfig": {
+                "maxOutputTokens": 500,
+                "temperature": 0.7
+            }
+        }).encode('utf-8')
+
+        url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}'
+
+        req = urllib.request.Request(
+            url,
+            data=payload,
+            headers={'Content-Type': 'application/json'},
+            method='POST'
+        )
+
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            result = json_lib.loads(resp.read().decode('utf-8'))
+            reply = result['candidates'][0]['content']['parts'][0]['text']
+            return jsonify({"reply": reply})
+
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode('utf-8')
+        print(f"Gemini API error: {e.code} - {error_body}")
+        traceback.print_exc()
+        return jsonify({"error": f"Gemini error {e.code}: {error_body}"}), 500
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':
