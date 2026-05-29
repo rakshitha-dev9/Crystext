@@ -7,3 +7,6 @@ bitsandbytes
 pymatgen
 accelerate
 huggingface_hub
+trl>=0.17.0
+datasets
+pandas

@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrysText — Structure Viewer</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#1456CB;--blue2:#1a6fe8;--blue-light:#EBF2FF;--blue-mid:#C7DCFF;
+  --text:#1a1a2e;--text2:#374151;--text3:#6B7280;--text4:#9CA3AF;
+  --bg:#F3F6FB;--white:#FFFFFF;
+  --border:#DDE3EE;--border2:#C8D1E0;
+  --green:#057A55;--green-light:#ECFDF5;
+  --red:#C81E1E;--red-light:#FEF2F2;
+  --amber:#B45309;--amber-light:#FFFBEB;
+  --navy:#1C2B4A;
+}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;min-height:100vh}
+
+/* NAV */
+nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(20,86,203,0.06)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-icon{width:32px;height:32px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.nav-logo-icon svg{width:18px;height:18px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav-logo-text{font-family:'Source Serif 4',serif;font-size:1.1rem;font-weight:600;color:var(--text)}
+.nav-logo-text span{color:var(--blue)}
+.nav-back{font-size:0.82rem;color:var(--blue);text-decoration:none;display:flex;align-items:center;gap:5px;font-weight:500}
+.nav-back svg{width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:2;stroke-linecap:round}
+.nav-back:hover{color:var(--blue2)}
+
+/* BREADCRUMB */
+.breadcrumb{background:var(--white);border-bottom:1px solid var(--border);padding:0.5rem 2rem;font-size:0.72rem;color:var(--text4);font-family:'IBM Plex Mono',monospace;display:flex;align-items:center;gap:6px}
+.breadcrumb a{color:var(--blue);text-decoration:none}
+.breadcrumb a:hover{text-decoration:underline}
+.breadcrumb-sep{color:var(--text4)}
+
+/* MATERIAL HEADER — like MP */
+.mat-header{background:var(--navy);padding:1.5rem 2rem}
+.mat-header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:2rem}
+.mat-header-left{display:flex;align-items:center;gap:1.5rem}
+.mat-icon-box{width:72px;height:72px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mat-icon-box canvas{border-radius:8px}
+.mat-formula{font-family:'Source Serif 4',serif;font-size:2.2rem;font-weight:600;color:white;line-height:1}
+.mat-sub{font-size:0.78rem;font-family:'IBM Plex Mono',monospace;color:#93B4D4;margin-top:6px}
+.mat-badges{display:flex;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap}
+.mat-badge{font-size:0.65rem;padding:3px 10px;border-radius:4px;font-weight:500;font-family:'IBM Plex Mono',monospace}
+.mat-badge.valid{background:rgba(5,122,85,0.25);color:#6EE7B7;border:1px solid rgba(5,122,85,0.3)}
+.mat-badge.invalid{background:rgba(200,30,30,0.25);color:#FCA5A5;border:1px solid rgba(200,30,30,0.3)}
+.mat-badge.warn{background:rgba(180,83,9,0.25);color:#FCD34D;border:1px solid rgba(180,83,9,0.3)}
+.mat-header-right{display:flex;gap:0.75rem;flex-shrink:0}
+.hdr-btn{font-size:0.78rem;padding:7px 16px;border-radius:5px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-weight:500;transition:all .15s;display:flex;align-items:center;gap:6px;text-decoration:none}
+.hdr-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.hdr-btn.primary{background:var(--blue);color:white;border:1px solid var(--blue)}
+.hdr-btn.primary:hover{background:var(--blue2)}
+.hdr-btn.secondary{background:rgba(255,255,255,0.08);color:#93B4D4;border:1px solid rgba(255,255,255,0.15)}
+.hdr-btn.secondary:hover{background:rgba(255,255,255,0.15);color:white}
+
+/* PAGE LAYOUT — Materials Project style: viewer left, props right */
+.page-layout{max-width:1200px;margin:0 auto;padding:2rem;display:grid;grid-template-columns:1fr 380px;gap:2rem;align-items:start}
+.viewer-col{}
+.props-col{display:flex;flex-direction:column;gap:1rem}
+
+/* CONTENT SECTIONS */
+.content-section{background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(20,86,203,0.04)}
+.cs-head{padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.cs-head-icon{width:28px;height:28px;background:var(--blue);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cs-head-icon svg{width:15px;height:15px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round}
+.cs-title{font-family:'Source Serif 4',serif;font-size:1rem;font-weight:600;color:var(--text)}
+.cs-body{padding:1.25rem}
+
+/* 3D VIEWER — transparent background like MP */
+#viewer-canvas{width:100%;height:520px;border-radius:8px;background:transparent;border:none;display:block;cursor:grab}
+#viewer-canvas:active{cursor:grabbing}
+.viewer-footer{margin-top:0.6rem;display:flex;align-items:center;justify-content:space-between}
+.viewer-info{font-size:0.7rem;font-family:'IBM Plex Mono',monospace;color:var(--text4)}
+.viewer-hint{font-size:0.7rem;color:var(--text4);font-style:italic}
+.viewer-controls{display:flex;gap:0.5rem;margin-top:0.75rem}
+.vctrl{font-size:0.72rem;padding:4px 12px;border-radius:4px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;border:1px solid var(--border2);background:var(--white);color:var(--text2);transition:all .15s}
+.vctrl:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.vctrl.active{background:var(--blue);color:white;border-color:var(--blue)}
+
+/* PROPERTIES GRID like MP */
+.prop-table{width:100%;border-collapse:collapse}
+.prop-table tr{border-bottom:1px solid var(--border)}
+.prop-table tr:last-child{border-bottom:none}
+.prop-table td{padding:0.7rem 1rem;font-size:0.85rem}
+.prop-table td:first-child{color:var(--text3);font-weight:400;width:45%}
+.prop-table td:last-child{color:var(--text);font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:0.82rem}
+.prop-highlight{color:var(--blue)!important}
+
+/* CELL PARAMETERS GRID */
+.cell-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem;margin-bottom:0.5rem}
+.cell-card{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:1rem 1.25rem}
+.cell-label{font-size:0.68rem;font-family:'IBM Plex Mono',monospace;color:var(--text4);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+.cell-val{font-size:1rem;font-weight:600;color:var(--text);font-family:'IBM Plex Mono',monospace}
+.cell-unit{font-size:0.7rem;color:var(--text4);margin-left:3px}
+
+/* CIF FILE */
+.cif-actions{display:flex;gap:0.5rem;margin-bottom:0.75rem}
+.cif-btn{font-size:0.75rem;padding:6px 14px;border-radius:5px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-weight:500;transition:all .15s;border:1px solid var(--border2);background:var(--white);color:var(--text2);display:flex;align-items:center;gap:5px}
+.cif-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.cif-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.cif-btn.primary{background:var(--blue);color:white;border-color:var(--blue)}
+.cif-btn.primary:hover{background:var(--blue2)}
+.cif-btn.primary svg{stroke:white}
+.cif-note{font-size:0.72rem;color:var(--text4);margin-bottom:0.75rem;padding:0.5rem 0.75rem;background:var(--bg);border-radius:5px;border:1px solid var(--border);font-family:'IBM Plex Mono',monospace}
+#cifOut{background:#1C2B4A;border-radius:7px;padding:1.25rem;font-size:0.72rem;font-family:'IBM Plex Mono',monospace;color:#A8C7E8;white-space:pre;overflow:auto;max-height:320px;line-height:1.7}
+.cif-toggle{font-size:0.72rem;color:var(--blue);cursor:pointer;font-family:'IBM Plex Mono',monospace;margin-top:0.5rem;display:inline-block}
+.cif-toggle:hover{text-decoration:underline}
+
+/* LOADING STATE */
+.loading-overlay{position:fixed;inset:0;background:rgba(243,246,251,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200}
+.loading-spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-family:'Source Serif 4',serif;font-size:1.1rem;color:var(--text2);margin-bottom:0.5rem}
+.loading-sub{font-size:0.78rem;color:var(--text4);font-family:'IBM Plex Mono',monospace}
+
+/* ERROR STATE */
+.error-page{max-width:480px;margin:4rem auto;text-align:center;padding:2rem}
+.error-icon{font-size:3rem;margin-bottom:1rem}
+.error-title{font-family:'Source Serif 4',serif;font-size:1.3rem;color:var(--text);margin-bottom:0.5rem}
+.error-desc{font-size:0.85rem;color:var(--text3);line-height:1.7;margin-bottom:1.5rem}
+.error-btn{display:inline-block;padding:0.75rem 1.5rem;background:var(--blue);color:white;border-radius:6px;text-decoration:none;font-size:0.85rem;font-weight:500}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .page-layout{grid-template-columns:1fr;padding:1rem}
+  .mat-header-inner{flex-direction:column;align-items:flex-start}
+  .cell-grid{grid-template-columns:repeat(2,1fr)}
+  #viewer-canvas{height:360px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Loading Crystal Structure</div>
+  <div class="loading-sub" id="loadingSub">Connecting to CrysText...</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 24 24"><polygon points="12,2 22,8 22,16 12,22 2,16 2,8"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/></svg>
+    </div>
+    <span class="nav-logo-text">Crys<span>Text</span></span>
+  </a>
+  <a href="index.html" class="nav-back">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Generator
+  </a>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="index.html">CrysText</a>
+  <span class="breadcrumb-sep">›</span>
+  <a href="index.html">Generate</a>
+  <span class="breadcrumb-sep">›</span>
+  <span id="bcFormula">Structure</span>
+</div>
+
+<!-- MATERIAL HEADER -->
+<div class="mat-header">
+  <div class="mat-header-inner">
+    <div class="mat-header-left">
+      <div class="mat-icon-box">
+        <canvas id="iconCanvas" width="64" height="64"></canvas>
+      </div>
+      <div>
+        <div class="mat-formula" id="hFormula">—</div>
+        <div class="mat-sub" id="hSub">—</div>
+        <div class="mat-badges" id="hBadges"></div>
+      </div>
+    </div>
+    <div class="mat-header-right">
+      <button class="hdr-btn secondary" onclick="copyCIF()">
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy CIF
+      </button>
+      <button class="hdr-btn primary" onclick="dlCIF()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download .cif
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE LAYOUT — Materials Project style: viewer left, properties right -->
+<div class="page-layout">
+
+  <!-- LEFT: BIG 3D VIEWER -->
+  <div class="viewer-col">
+    <canvas id="viewer-canvas"></canvas>
+    <div class="viewer-footer">
+      <div class="viewer-info" id="viewerInfo">—</div>
+      <div class="viewer-hint">Drag to rotate · Scroll to zoom</div>
+    </div>
+    <div class="viewer-controls">
+      <button class="vctrl active" id="btn-ballstick" onclick="setStyle('ballstick',this)">Ball & Stick</button>
+      <button class="vctrl" id="btn-spacefill" onclick="setStyle('spacefill',this)">Space Fill</button>
+      <button class="vctrl" id="btn-wireframe" onclick="setStyle('wireframe',this)">Wireframe</button>
+    </div>
+
+    <!-- CIF FILE — below viewer on left -->
+    <div class="content-section" id="sec-cif" style="margin-top:1.5rem">
+      <div class="cs-head">
+        <div class="cs-head-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <span class="cs-title">CIF File</span>
+      </div>
+      <div class="cs-body">
+        <div class="cif-note" id="cifNote">Showing essential data only. Click below to see all symmetry operations.</div>
+        <div class="cif-actions">
+          <button class="cif-btn primary" onclick="dlCIF()">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download .cif
+          </button>
+          <button class="cif-btn" onclick="copyCIF()">Copy</button>
+        </div>
+        <pre id="cifOut"></pre>
+        <span class="cif-toggle" id="cifToggle" onclick="toggleCIF()">▼ Show Full CIF</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: PROPERTIES PANEL -->
+  <div class="props-col">
+
+    <!-- CELL PARAMETERS -->
+    <div class="content-section" id="sec-cell">
+      <div class="cs-head">
+        <div class="cs-head-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <span class="cs-title">Cell Parameters</span>
+      </div>
+      <div class="cs-body">
+        <div class="cell-grid" id="cellGrid"></div>
+      </div>
+    </div>
+
+    <!-- PROPERTIES -->
+    <div class="content-section" id="sec-properties" style="margin-top:1rem">
+      <div class="cs-head">
+        <div class="cs-head-icon">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <span class="cs-title">Properties</span>
+      </div>
+      <div class="cs-body">
+        <table class="prop-table" id="propTable"></table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Get data from URL params
+const params = new URLSearchParams(window.location.search);
+const formula = params.get('formula') || '';
+const sg = params.get('sg') || '';
+
+let fullCIF = '';
+let shortCIF = '';
+let showingFull = false;
+let viewStyle = 'ballstick';
+let atomsData = [];
+let validationData = {};
+
+// Scroll to section
+function scrollTo(id){
+  document.getElementById(id).scrollIntoView({behavior:'smooth'});
+  document.querySelectorAll('.toc-item').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// On load — check localStorage first, then fetch from Flask
+window.addEventListener('load', async () => {
+  if(!formula || !sg){
+    showError('No formula or space group provided.', 'Go back and generate a structure first.');
+    return;
+  }
+
+  document.getElementById('loadingSub').textContent = `Loading ${formula} SG ${sg}...`;
+  document.getElementById('bcFormula').textContent = `${formula} · SG ${sg}`;
+
+  // Check localStorage first — instant load, no re-generation needed
+  const cached = localStorage.getItem('crystext_result');
+  if(cached){
+    try{
+      const data = JSON.parse(cached);
+      if(data.formula === formula && data.sg === sg){
+        fullCIF = data.cif;
+        validationData = data.validation || {};
+        shortCIF = buildShortCIF(fullCIF);
+        renderPage(formula, sg, fullCIF, validationData);
+        document.getElementById('loadingOverlay').style.display = 'none';
+        return;
+      }
+    } catch(e){}
+  }
+
+  // No cache — fetch from Flask
+  document.getElementById('loadingSub').textContent = `Generating ${formula} SG ${sg}...`;
+  try {
+    const res = await fetch('http://localhost:5000/generate', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({formula, spacegroup: sg})
+    });
+    const data = await res.json();
+    if(data.error){ showError('Generation Failed', data.error); return; }
+    fullCIF = data.cif;
+    validationData = data.validation || {};
+    shortCIF = buildShortCIF(fullCIF);
+    renderPage(formula, sg, fullCIF, validationData);
+    document.getElementById('loadingOverlay').style.display = 'none';
+  } catch(e) {
+    showError('Connection Error', 'Cannot connect to backend. Make sure app.py is running on port 5000.');
+  }
+});
+
+function showError(title, desc){
+  document.getElementById('loadingOverlay').style.display = 'none';
+  document.body.innerHTML += `
+    <div class="error-page">
+      <div class="error-icon">⚠️</div>
+      <div class="error-title">${title}</div>
+      <div class="error-desc">${desc}</div>
+      <a href="index.html" class="error-btn">← Back to Generator</a>
+    </div>`;
+}
+
+function buildShortCIF(cif){
+  const lines = cif.split('\n');
+  const result = [];
+  let inSymmLoop = false;
+  let inAtomLoop = false;
+
+  for(let i = 0; i < lines.length; i++){
+    const l = lines[i].trim();
+
+    // Detect start of symmetry loop
+    if(l === 'loop_'){
+      // Look ahead to see if next non-empty line is symmetry related
+      let j = i + 1;
+      while(j < lines.length && lines[j].trim() === '') j++;
+      const nextLine = lines[j] ? lines[j].trim() : '';
+      if(nextLine.startsWith('_symmetry_equiv')){
+        inSymmLoop = true;
+        inAtomLoop = false;
+        continue; // skip the loop_ line too
+      } else if(nextLine.startsWith('_atom_site')){
+        inSymmLoop = false;
+        inAtomLoop = true;
+      } else {
+        inSymmLoop = false;
+      }
+    }
+
+    // Skip all symmetry loop content
+    if(inSymmLoop){
+      if(l.startsWith('_atom_site') || l.startsWith('data_') || (l === 'loop_' && inSymmLoop)){
+        inSymmLoop = false;
+        if(l === 'loop_') { result.push(lines[i]); continue; }
+      } else {
+        continue;
+      }
+    }
+
+    result.push(lines[i]);
+  }
+  return result.join('\n').trim();
+}
+
+function toggleCIF(){
+  showingFull = !showingFull;
+  document.getElementById('cifOut').textContent = showingFull ? fullCIF : shortCIF;
+  const toggle = document.getElementById('cifToggle');
+  const note = document.getElementById('cifNote');
+  if(showingFull){
+    toggle.textContent = '▲ Hide symmetry operations';
+    if(note) note.style.display = 'none';
+  } else {
+    toggle.textContent = '▼ Show Full CIF (includes all symmetry operations)';
+    if(note) note.style.display = 'block';
+  }
+}
+
+function renderPage(formula, sg, cif, val){
+  const detFormula = val.detected_formula || formula;
+  const detSG = val.detected_spacegroup || sg;
+
+  // Header
+  document.title = `CrysText — ${detFormula}`;
+  document.getElementById('hFormula').textContent = detFormula;
+  document.getElementById('hSub').textContent = `Space Group: ${detSG} · Input: ${formula} SG ${sg} · Generated by CrysText`;
+  document.getElementById('bcFormula').textContent = detFormula;
+
+  const badges = document.getElementById('hBadges');
+  badges.innerHTML = val.valid
+    ? '<span class="mat-badge valid">✓ Valid CIF</span>'
+    : '<span class="mat-badge invalid">✗ Invalid CIF</span>';
+  badges.innerHTML += val.composition_match
+    ? '<span class="mat-badge valid">✓ Composition Match</span>'
+    : '<span class="mat-badge warn">⚠ Composition Mismatch</span>';
+
+  // CIF display
+  document.getElementById('cifOut').textContent = shortCIF || cif;
+
+  // Cell parameters
+  const cellA = cif.match(/_cell_length_a\s+([\d.]+)/);
+  const cellB = cif.match(/_cell_length_b\s+([\d.]+)/);
+  const cellC = cif.match(/_cell_length_c\s+([\d.]+)/);
+  const alpha = cif.match(/_cell_angle_alpha\s+([\d.]+)/);
+  const beta = cif.match(/_cell_angle_beta\s+([\d.]+)/);
+  const gamma = cif.match(/_cell_angle_gamma\s+([\d.]+)/);
+  const vol = cif.match(/_cell_volume\s+([\d.]+)/);
+
+  const cellParams = [
+    {l:'a',v:cellA?parseFloat(cellA[1]).toFixed(3):'—',u:'Å'},
+    {l:'b',v:cellB?parseFloat(cellB[1]).toFixed(3):'—',u:'Å'},
+    {l:'c',v:cellC?parseFloat(cellC[1]).toFixed(3):'—',u:'Å'},
+    {l:'α',v:alpha?parseFloat(alpha[1]).toFixed(2)+'°':'—',u:''},
+    {l:'β',v:beta?parseFloat(beta[1]).toFixed(2)+'°':'—',u:''},
+    {l:'γ',v:gamma?parseFloat(gamma[1]).toFixed(2)+'°':'—',u:''},
+  ];
+  if(vol) cellParams.push({l:'Volume',v:parseFloat(vol[1]).toFixed(2),u:'Å³'});
+
+  document.getElementById('cellGrid').innerHTML = cellParams.map(p=>`
+    <div class="cell-card">
+      <div class="cell-label">${p.l}</div>
+      <div class="cell-val">${p.v}<span class="cell-unit">${p.u}</span></div>
+    </div>
+  `).join('');
+
+  // Properties table
+  const formulaSum = cif.match(/_chemical_formula_sum\s+'([^']+)'/);
+  const formulaStruct = cif.match(/_chemical_formula_structural\s+(\S+)/);
+  const Z = cif.match(/_cell_formula_units_Z\s+(\d+)/);
+  const sgName = cif.match(/_symmetry_space_group_name_H-M\s+(\S+)/);
+
+  const props = [
+    ['Formula (Structural)', formulaStruct?formulaStruct[1]:'—'],
+    ['Formula (Full)', formulaSum?formulaSum[1].replace(/'/g,''):'—'],
+    ['Detected Space Group', detSG + (sgName ? ' ('+sgName[1]+')' : '')],
+    ['Requested Space Group', sg],
+    ['Z (formula units)', Z?Z[1]:'—'],
+    ['Volume', vol ? parseFloat(vol[1]).toFixed(2)+' Å³' : '—'],
+    ['Valid CIF', val.valid ? 'Yes ✓' : 'No ✗'],
+  ];
+
+  document.getElementById('propTable').innerHTML = props.map(([k,v])=>`
+    <tr><td>${k}</td><td class="prop-highlight">${v}</td></tr>
+  `).join('');
+
+  // Build 3D viewer
+  atomsData = parseCIFAtoms(cif);
+  buildViewer();
+  buildIconCanvas();
+}
+
+// VIEWER STYLES
+function setStyle(style, btn){
+  viewStyle = style;
+  document.querySelectorAll('.vctrl').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildViewer();
+}
+
+function buildViewer(){
+  const canvas = document.getElementById('viewer-canvas');
+  const info = document.getElementById('viewerInfo');
+  if(!atomsData || atomsData.length===0){info.textContent='Could not parse atom positions';return}
+
+  const EL_COLORS={Na:'#F97316',Cl:'#818CF8',Ti:'#60A5FA',O:'#F87171',Fe:'#A78BFA',Ba:'#34D399',Ca:'#FBBF24',K:'#F472B6',Li:'#67E8F9',Mg:'#86EFAC',Al:'#FCA5A5',Si:'#A5F3FC',S:'#FEF08A',N:'#93C5FD',H:'#E5E7EB',Cu:'#FB923C',Zn:'#A3E635',Ga:'#C4B5FD',As:'#6EE7B7',Bi:'#FB7185',Pb:'#94A3B8',Sn:'#FCD34D',Ge:'#6EE7B7',W:'#7DD3FC',Mn:'#F9A8D4',Co:'#86EFAC',Ni:'#FDE68A',default:'#94A3B8'};
+  const EL_RADII={Na:1.02,Cl:0.99,O:0.73,Ti:0.86,Fe:0.78,Ba:1.35,Ca:1.14,K:1.33,Li:0.76,Mg:0.86,Al:0.68,Si:0.54,H:0.31,Cu:0.87,W:0.88,Mn:0.81,Co:0.79,Ni:0.83,Ga:1.22,As:1.19,default:0.85};
+
+  // Detect lattice type from space group name in CIF
+  const sgMatch = fullCIF.match(/_symmetry_space_group_name_H-M\s+'?([^'\n]+)'?/);
+  const sgName = sgMatch ? sgMatch[1].trim() : '';
+  const sgNum = validationData.detected_spacegroup || 0;
+
+  // Lattice translations based on lattice type
+  let latticeTranslations = [[0,0,0]]; // primitive default
+  if(sgName.startsWith('F') || (sgNum>=196 && sgNum<=227)){
+    // FCC — 4 translations
+    latticeTranslations = [[0,0,0],[0.5,0.5,0],[0.5,0,0.5],[0,0.5,0.5]];
+  } else if(sgName.startsWith('I') || (sgNum>=197 && sgNum<=206)){
+    // BCC — 2 translations
+    latticeTranslations = [[0,0,0],[0.5,0.5,0.5]];
+  } else if(sgName.startsWith('A')){
+    latticeTranslations = [[0,0,0],[0,0.5,0.5]];
+  } else if(sgName.startsWith('B')){
+    latticeTranslations = [[0,0,0],[0.5,0,0.5]];
+  } else if(sgName.startsWith('C')){
+    latticeTranslations = [[0,0,0],[0.5,0.5,0]];
+  } else if(sgName.startsWith('R')){
+    latticeTranslations = [[0,0,0],[2/3,1/3,1/3],[1/3,2/3,2/3]];
+  }
+
+  // Apply lattice translations to get all atoms in conventional cell
+  const conventional = [];
+  for(const [tx,ty,tz] of latticeTranslations){
+    for(const a of atomsData){
+      const nx = (a.x + tx) % 1;
+      const ny = (a.y + ty) % 1;
+      const nz = (a.z + tz) % 1;
+      conventional.push({element:a.element, x:nx, y:ny, z:nz});
+    }
+  }
+
+  // Remove duplicates within tolerance
+  const unique = [];
+  for(const a of conventional){
+    const isDup = unique.some(b =>
+      Math.abs(a.x-b.x)<0.01 && Math.abs(a.y-b.y)<0.01 && Math.abs(a.z-b.z)<0.01
+    );
+    if(!isDup) unique.push(a);
+  }
+
+  // Add boundary atoms like VESTA — atoms on faces, edges, corners
+  // appear multiple times for visual completeness
+  const withBoundary = [];
+  const tolerance = 0.01;
+  for(const a of unique){
+    // Generate all boundary copies
+    const xs = [a.x];
+    const ys = [a.y];
+    const zs = [a.z];
+    if(a.x < tolerance) xs.push(1.0);
+    if(a.y < tolerance) ys.push(1.0);
+    if(a.z < tolerance) zs.push(1.0);
+    if(a.x > 1-tolerance) xs.push(0.0);
+    if(a.y > 1-tolerance) ys.push(0.0);
+    if(a.z > 1-tolerance) zs.push(0.0);
+    for(const x of xs) for(const y of ys) for(const z of zs)
+      withBoundary.push({element:a.element, x, y, z});
+  }
+
+  // Build 1x1x1 conventional cell only for cleaner visualization
+  const supercell=[];
+  for(const a of withBoundary)
+    supercell.push({element:a.element,x:a.x-0.5,y:a.y-0.5,z:a.z-0.5});
+
+  const SF=4.5;const sc=supercell.map(a=>({...a,x:a.x*SF,y:a.y*SF,z:a.z*SF}));
+
+  const bonds=[];
+  // Bonds disabled by default — like VESTA's default view
+  // Only draw bonds in wireframe mode
+  if(viewStyle==='wireframe'){
+    for(let i=0;i<sc.length;i++)for(let j=i+1;j<sc.length;j++){
+      const a=sc[i],b=sc[j];
+      const d=Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2+(a.z-b.z)**2);
+      const thresh=((EL_RADII[a.element]||0.85)+(EL_RADII[b.element]||0.85))*SF*0.75;
+      if(d<thresh)bonds.push([i,j]);
+    }
+  }
+
+  info.textContent=withBoundary.length+' atoms · '+bonds.length+' bonds · SG: '+(validationData.detected_spacegroup||'?');
+
+  const W=canvas.offsetWidth||800,H=480;canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  let rotX=0.3,rotY=0.4,zoom=1.0,dragging=false,lastX=0,lastY=0,alive=true;
+  if(canvas._kill)canvas._kill();canvas._kill=()=>{alive=false};
+
+  canvas.onmousedown=e=>{dragging=true;lastX=e.clientX;lastY=e.clientY};
+  window.onmouseup=()=>dragging=false;
+  window.onmousemove=e=>{if(!dragging)return;rotY+=(e.clientX-lastX)*0.007;rotX+=(e.clientY-lastY)*0.007;lastX=e.clientX;lastY=e.clientY};
+  canvas.onwheel=e=>{zoom*=e.deltaY>0?0.93:1.08;zoom=Math.max(0.3,Math.min(4,zoom));e.preventDefault()};
+  canvas.ontouchstart=e=>{dragging=true;lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;e.preventDefault()};
+  canvas.ontouchend=()=>dragging=false;
+  canvas.ontouchmove=e=>{if(!dragging)return;rotY+=(e.touches[0].clientX-lastX)*0.007;rotX+=(e.touches[0].clientY-lastY)*0.007;lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;e.preventDefault()};
+
+  function proj(x,y,z){const cy=Math.cos(rotY),sy=Math.sin(rotY);const rx=x*cy+z*sy,rz=-x*sy+z*cy;const cx=Math.cos(rotX),sx=Math.sin(rotX);const ry=y*cx-rz*sx,rz2=y*sx+rz*cx;const P=5/(5+rz2);const S=Math.min(W,H)*0.36*zoom;return{sx:W/2+rx*S*P,sy:H/2+ry*S*P,depth:rz2,P}}
+
+  function sphere(sx,sy,r,col){
+    // Outer sphere
+    const g=ctx.createRadialGradient(sx-r*0.35,sy-r*0.4,r*0.05,sx,sy,r);
+    g.addColorStop(0,'rgba(255,255,255,0.98)');
+    g.addColorStop(0.12,col+'ff');
+    g.addColorStop(0.5,col+'ee');
+    g.addColorStop(0.85,col+'99');
+    g.addColorStop(1,col+'11');
+    ctx.beginPath();ctx.arc(sx,sy,r,0,Math.PI*2);
+    ctx.fillStyle=g;ctx.fill();
+    // Rim
+    ctx.strokeStyle=col+'66';ctx.lineWidth=Math.max(0.5,r*0.05);ctx.stroke();
+  }
+
+  function frame(){
+    if(!alive)return;
+    ctx.fillStyle='#F8FAFB';ctx.fillRect(0,0,W,H);
+    // NO auto rotation — stays still like VESTA until user drags
+    const pr=sc.map(a=>({...a,...proj(a.x,a.y,a.z)}));
+    const order=pr.map((_,i)=>i).sort((a,b)=>pr[a].depth-pr[b].depth);
+
+    if(viewStyle!=='spacefill'){
+      for(const[i,j]of bonds){
+        const a=pr[i],b=pr[j];if(a.P<0.05||b.P<0.05)continue;
+        const mx=(a.sx+b.sx)/2,my=(a.sy+b.sy)/2;
+        const lw=Math.max(1.5,3.5*Math.min(a.P,b.P)*zoom);
+        if(viewStyle==='wireframe'){
+          ctx.lineWidth=lw*0.6;ctx.beginPath();ctx.moveTo(a.sx,a.sy);ctx.lineTo(b.sx,b.sy);
+          ctx.strokeStyle='#94A3B8';ctx.stroke();
+        } else {
+          ctx.lineWidth=lw;
+          ctx.beginPath();ctx.moveTo(a.sx,a.sy);ctx.lineTo(mx,my);
+          ctx.strokeStyle=(EL_COLORS[a.element]||EL_COLORS.default)+'bb';ctx.stroke();
+          ctx.beginPath();ctx.moveTo(mx,my);ctx.lineTo(b.sx,b.sy);
+          ctx.strokeStyle=(EL_COLORS[b.element]||EL_COLORS.default)+'bb';ctx.stroke();
+        }
+      }
+    }
+
+    if(viewStyle!=='wireframe'){
+      for(const i of order){
+        const a=pr[i];if(a.P<0.05)continue;
+        const col=EL_COLORS[a.element]||EL_COLORS.default;
+        const baseR=(EL_RADII[a.element]||0.85);
+        const r=viewStyle==='spacefill'
+          ? Math.max(10,baseR*55*a.P*zoom)
+          : Math.max(8,baseR*38*a.P*zoom);
+        sphere(a.sx,a.sy,r,col);
+        if(r>10){
+          ctx.fillStyle='rgba(0,0,0,0.7)';
+          ctx.font='bold '+Math.round(r*0.55)+'px IBM Plex Sans,sans-serif';
+          ctx.textAlign='center';ctx.textBaseline='middle';
+          ctx.fillText(a.element,a.sx,a.sy);
+        }
+      }
+    }
+
+    // Draw unit cell box — like VESTA
+    const boxSize = SF * 0.5;
+    const boxCorners = [
+      [-boxSize,-boxSize,-boxSize],[boxSize,-boxSize,-boxSize],
+      [boxSize,boxSize,-boxSize],[-boxSize,boxSize,-boxSize],
+      [-boxSize,-boxSize,boxSize],[boxSize,-boxSize,boxSize],
+      [boxSize,boxSize,boxSize],[-boxSize,boxSize,boxSize]
+    ].map(([x,y,z])=>proj(x,y,z));
+    const boxEdges=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+    ctx.strokeStyle='rgba(100,130,180,0.4)';ctx.lineWidth=0.8;
+    for(const[a,b]of boxEdges){
+      ctx.beginPath();ctx.moveTo(boxCorners[a].sx,boxCorners[a].sy);
+      ctx.lineTo(boxCorners[b].sx,boxCorners[b].sy);ctx.stroke();
+    }
+    const els=[...new Set(sc.map(a=>a.element))];
+    let lx=14;
+    ctx.font='11px IBM Plex Mono,monospace';
+    for(const el of els){
+      const c=EL_COLORS[el]||EL_COLORS.default;
+      ctx.beginPath();ctx.arc(lx+6,H-14,6,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();
+      ctx.fillStyle='#6B7280';ctx.textAlign='left';ctx.textBaseline='middle';
+      ctx.fillText(el,lx+16,H-14);
+      lx+=ctx.measureText(el).width+30;
+    }
+
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function buildIconCanvas(){
+  const c = document.getElementById('iconCanvas');
+  const ctx = c.getContext('2d');
+  if(!atomsData.length) return;
+  const EL_COLORS={Na:'#F97316',Cl:'#818CF8',Ti:'#60A5FA',O:'#F87171',Fe:'#A78BFA',Ba:'#34D399',Ca:'#FBBF24',K:'#F472B6',default:'#60A5FA'};
+  ctx.fillStyle='rgba(255,255,255,0.05)';ctx.fillRect(0,0,64,64);
+  const els=[...new Set(atomsData.map(a=>a.element))].slice(0,4);
+  const positions=[[16,16],[48,16],[16,48],[48,48]];
+  els.forEach((el,i)=>{
+    const [x,y]=positions[i]||[32,32];
+    const col=EL_COLORS[el]||EL_COLORS.default;
+    ctx.beginPath();ctx.arc(x,y,10,0,Math.PI*2);
+    ctx.fillStyle=col+'99';ctx.fill();
+    ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();
+    ctx.fillStyle='white';ctx.font='bold 8px IBM Plex Sans';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(el,x,y);
+  });
+}
+
+function parseCIFAtoms(cif){
+  const atoms=[];const lines=cif.split('\n');
+  let xIdx=-1,yIdx=-1,zIdx=-1,elIdx=-1,labelIdx=-1,headers=[],inAtom=false;
+  for(let i=0;i<lines.length;i++){
+    const l=lines[i].trim();
+    if(l==='loop_'){headers=[];xIdx=-1;yIdx=-1;zIdx=-1;elIdx=-1;labelIdx=-1;inAtom=false;continue}
+    if(l.startsWith('_atom_site_')){
+      headers.push(l);inAtom=true;
+      if(l==='_atom_site_fract_x')xIdx=headers.length-1;
+      if(l==='_atom_site_fract_y')yIdx=headers.length-1;
+      if(l==='_atom_site_fract_z')zIdx=headers.length-1;
+      if(l==='_atom_site_type_symbol')elIdx=headers.length-1;
+      if(l==='_atom_site_label')labelIdx=headers.length-1;
+      continue;
+    }
+    if(inAtom&&xIdx>=0&&l.length>0&&!l.startsWith('_')&&!l.startsWith('loop_')&&!l.startsWith('data_')){
+      const p=l.split(/\s+/);
+      if(p.length>Math.max(xIdx,yIdx,zIdx)){
+        let el=elIdx>=0?p[elIdx]:(labelIdx>=0?p[labelIdx].replace(/[0-9+\-]/g,''):'X');
+        el=el.charAt(0).toUpperCase()+el.slice(1).toLowerCase();
+        const x=parseFloat(p[xIdx]),y=parseFloat(p[yIdx]),z=parseFloat(p[zIdx]);
+        if(!isNaN(x)&&!isNaN(y)&&!isNaN(z))atoms.push({element:el,x,y,z});
+      }
+    }
+    if(inAtom&&xIdx>=0&&(l.startsWith('loop_')||l.startsWith('_cell')||l.startsWith('_symmetry')||l.startsWith('data_')))inAtom=false;
+  }
+  return atoms;
+}
+
+function copyCIF(){
+  navigator.clipboard.writeText(fullCIF).then(()=>{
+    const btns=document.querySelectorAll('.cif-btn,.hdr-btn');
+    btns.forEach(b=>{if(b.textContent.includes('Copy')){const orig=b.textContent;b.textContent='Copied!';setTimeout(()=>b.textContent=orig,1500)}});
+  });
+}
+
+function dlCIF(){
+  const blob=new Blob([fullCIF],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=(validationData.detected_formula||formula)+'.cif';a.click();
+}
+</script>
+</body>
+</html>

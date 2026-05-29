@@ -4,937 +4,848 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CrysText — Crystal Structure Generation</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --or:#F97316;--or2:#FB923C;--or3:#EA6A10;
-  --bg:#0E1117;--bg2:#161B24;
-  --text:#F0EDE8;--muted:#7A8899;--faint:#2E3848;
-  --border:rgba(249,115,22,0.22);--borderf:rgba(249,115,22,0.10);
-  --card:#131920;
+  --blue:#1456CB;--blue2:#1a6fe8;--blue-light:#EBF2FF;--blue-mid:#C7DCFF;
+  --text:#1a1a2e;--text2:#374151;--text3:#6B7280;--text4:#9CA3AF;
+  --bg:#F3F6FB;--white:#FFFFFF;
+  --border:#DDE3EE;--border2:#C8D1E0;
+  --green:#057A55;--green-light:#ECFDF5;
+  --red:#C81E1E;--red-light:#FEF2F2;
+  --amber:#B45309;--amber-light:#FFFBEB;
+  --navy:#1C2B4A;
 }
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;min-height:100vh}
 
+/* NAV */
 nav{
-  position:fixed;top:0;left:0;right:0;z-index:300;
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:0 2.5rem;height:58px;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 3rem;height:56px;
-  background:rgba(14,17,23,0.85);backdrop-filter:blur(20px);
-  border-bottom:1px solid rgba(249,115,22,0.08);
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 1px 4px rgba(20,86,203,0.06);
 }
-.logo{font-family:'Playfair Display',serif;font-size:1.15rem;letter-spacing:1.5px;color:var(--text)}
-.logo b{color:var(--or)}
-.nav-links a{color:var(--muted);text-decoration:none;font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;transition:color .2s;margin-left:2rem}
-.nav-links a:hover{color:var(--or)}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-logo-icon{width:34px;height:34px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.nav-logo-icon svg{width:20px;height:20px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav-logo-text{font-family:'Source Serif 4',serif;font-size:1.15rem;font-weight:600;color:var(--text)}
+.nav-logo-text span{color:var(--blue)}
+.nav-center{display:flex;align-items:center}
+.nav-item{font-size:0.92rem;color:var(--text3);text-decoration:none;padding:0 1.25rem;height:58px;display:flex;align-items:center;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;font-weight:400;cursor:pointer;letter-spacing:0.01em}
+.nav-item:hover{color:var(--text2)}
+.nav-item.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:500}
 
-#hero{position:relative;height:100vh;overflow:hidden;background:var(--bg);cursor:default}
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--navy) 0%,#1e3a6e 100%);padding:3.5rem 2.5rem;color:white;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.hero-inner{max-width:1100px;margin:0 auto;position:relative;z-index:1;display:grid;grid-template-columns:1fr 360px;gap:3rem;align-items:center}
+.hero-eyebrow{font-size:0.7rem;font-family:'IBM Plex Mono',monospace;color:#7DD3FC;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.85rem;display:flex;align-items:center;gap:8px}
+.hero-eyebrow::before{content:'';width:24px;height:1px;background:#7DD3FC}
+.hero-title{font-family:'Source Serif 4',serif;font-size:2.4rem;font-weight:600;line-height:1.2;margin-bottom:0.9rem;color:white}
+.hero-title span{color:#7DD3FC}
+.hero-desc{font-size:0.9rem;color:#93B4D4;line-height:1.75;max-width:480px;font-weight:300;margin-bottom:2rem}
+.hero-cta{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:white;border:none;padding:0.85rem 2rem;border-radius:6px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:background .15s;text-decoration:none}
+.hero-cta svg{width:16px;height:16px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hero-cta:hover{background:var(--blue2)}
+.hero-stats{display:flex;gap:0;margin-top:1.75rem;border-top:1px solid rgba(255,255,255,0.1);padding-top:1.5rem}
+.hstat{text-align:left;padding-right:1.5rem;margin-right:1.5rem;border-right:1px solid rgba(255,255,255,0.1)}
+.hstat:last-child{border-right:none;margin-right:0;padding-right:0}
+.hstat-n{font-family:'Source Serif 4',serif;font-size:1.5rem;font-weight:600;color:white}
+.hstat-l{font-size:0.62rem;color:#7DD3FC;margin-top:2px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.08em;text-transform:uppercase}
+.hero-right{overflow:hidden}
+.hero-right-labels{padding:0.6rem 0;display:flex;justify-content:space-around;margin-top:0.5rem}
 
-#hero::before{
-  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(ellipse at 50% 40%, rgba(249,115,22,0.04) 0%, transparent 65%),
-    linear-gradient(to bottom, rgba(14,17,23,0.92) 0%, rgba(14,17,23,0) 15%,
-      rgba(14,17,23,0) 80%, rgba(14,17,23,0.96) 100%);
-}
+/* PAGE SECTIONS — full width dividers like MP */
+.page-section{background:var(--bg)}
+.section-divider{width:100%;border:none;border-top:2px solid var(--border);margin:0;display:block}
+.section-inner{max-width:1100px;margin:0 auto;padding:2.5rem 2.5rem 2.5rem}
+.section-inner-last{max-width:1100px;margin:0 auto;padding:2.5rem 2.5rem 4rem}
 
-canvas#particle-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;}
+/* Section heading — left aligned like MP, big and clear */
+.mp-section-head{display:flex;align-items:center;gap:0;margin-bottom:2rem}
+.mp-section-icon{display:none}
+.mp-section-title{font-family:'Source Serif 4',serif;font-size:2rem;font-weight:600;color:var(--text);letter-spacing:-0.3px}
+.mp-section-desc{font-size:0.82rem;color:var(--text3);margin-left:auto;font-style:italic}
 
-/* Central crystal glow — CSS only */
-.crystal-core{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  z-index:2;pointer-events:none;
-  width:200px;height:200px;
-}
-.crystal-core::before{
-  content:'';position:absolute;inset:0;
-  border-radius:50%;
-  background:radial-gradient(circle, rgba(249,115,22,0.13) 0%, rgba(249,115,22,0.04) 40%, transparent 70%);
-  animation:corePulse 3s ease-in-out infinite;
-}
-.crystal-core::after{
-  content:'';position:absolute;inset:30px;
-  border-radius:50%;
-  background:radial-gradient(circle, rgba(249,115,22,0.22) 0%, rgba(249,115,22,0.05) 60%, transparent 100%);
-  animation:corePulse 3s ease-in-out infinite 0.5s;
-}
-@keyframes corePulse{
-  0%,100%{transform:scale(1);opacity:0.8;}
-  50%{transform:scale(1.15);opacity:1;}
-}
+/* TWO COLUMN LAYOUT */
+.two-col{display:grid;grid-template-columns:320px 1fr;gap:1.5rem;align-items:start}
 
-/* Gem SVG at center */
-.gem-center{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  z-index:3;pointer-events:none;
-  width:96px;height:96px;
-  filter:drop-shadow(0 0 16px rgba(249,115,22,0.6)) drop-shadow(0 0 36px rgba(249,115,22,0.3));
-  animation:gemFloat 4s ease-in-out infinite;
-}
-@keyframes gemFloat{
-  0%,100%{transform:translate(-50%,-50%) translateY(0) rotate(0deg);}
-  50%{transform:translate(-50%,-50%) translateY(-8px) rotate(2deg);}
-}
+/* INPUT PANEL */
+.panel{background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(20,86,203,0.04)}
+.panel-head{background:var(--navy);padding:0.85rem 1.25rem;display:flex;align-items:center;gap:8px}
+.panel-head svg{width:14px;height:14px;stroke:rgba(255,255,255,0.6);fill:none;stroke-width:2;stroke-linecap:round}
+.panel-title{font-size:0.72rem;font-weight:500;color:white;letter-spacing:0.1em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace}
+.panel-body{padding:1.5rem}
+.field{margin-bottom:1.1rem}
+.field label{display:block;font-size:0.7rem;font-weight:500;color:var(--text3);margin-bottom:0.4rem;letter-spacing:0.08em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace}
+.field input{width:100%;padding:0.6rem 0.9rem;border:1px solid var(--border2);border-radius:5px;font-size:0.88rem;font-family:'IBM Plex Mono',monospace;color:var(--text);background:var(--white);outline:none;transition:border-color .15s,box-shadow .15s}
+.field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(20,86,203,0.08)}
+.field input::placeholder{color:var(--text4);font-family:'IBM Plex Sans',sans-serif}
+.field-hint{font-size:0.68rem;color:var(--text4);margin-top:0.3rem}
+.divider{height:1px;background:var(--border);margin:1rem 0}
+.quick-title{font-size:0.68rem;font-weight:500;color:var(--text4);letter-spacing:0.08em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;margin-bottom:0.5rem}
+.quick-chips{display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:1.25rem}
+.chip{font-size:0.7rem;padding:3px 10px;border-radius:4px;border:1px solid var(--border2);color:var(--text2);cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:all .15s;background:var(--bg)}
+.chip:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.gen-btn{width:100%;padding:0.85rem;background:var(--blue);color:white;border:none;border-radius:5px;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;letter-spacing:0.03em;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.gen-btn svg{width:15px;height:15px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gen-btn:hover{background:var(--blue2)}
+.gen-btn:disabled{opacity:0.4;cursor:not-allowed}
 
-.hero-brand{
-  position:absolute;top:0;left:0;right:0;z-index:10;
-  display:flex;flex-direction:column;align-items:center;
-  padding-top:74px;pointer-events:none;
-}
-.hero-brand-name{
-  font-family:'Playfair Display',serif;
-  font-size:4.2rem;font-weight:700;letter-spacing:8px;
-  color:var(--text);line-height:1;
-  text-shadow:0 0 60px rgba(249,115,22,0.12);
-}
-.hero-brand-name b{color:var(--or);text-shadow:0 0 30px rgba(249,115,22,0.35)}
-.hero-brand-sub{
-  font-family:'DM Mono',monospace;font-size:0.63rem;
-  letter-spacing:0.22em;text-transform:uppercase;
-  color:var(--muted);margin-top:0.65rem;
-}
+/* ABOUT BOX */
+.info-box{background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:1rem;box-shadow:0 1px 3px rgba(20,86,203,0.04)}
+.info-box-head{background:var(--bg);border-bottom:1px solid var(--border);padding:0.65rem 1rem;font-size:0.68rem;font-weight:600;color:var(--text2);letter-spacing:0.08em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace}
+.info-box-body{padding:0}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:0.55rem 1rem;border-bottom:1px solid var(--border);font-size:0.78rem}
+.info-row:last-child{border-bottom:none}
+.info-key{color:var(--text3)}
+.info-val{color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:0.72rem;font-weight:500}
 
-.edu-label{position:absolute;z-index:10;pointer-events:none;opacity:0;animation:fadeLabel 0.7s ease forwards;}
-.edu-box{
-  background:rgba(19,25,32,0.82);border:1px solid var(--border);border-radius:3px;
-  padding:0.45rem 0.78rem;backdrop-filter:blur(12px);
-  box-shadow:0 2px 20px rgba(0,0,0,0.4);white-space:nowrap;
-}
-.edu-key{font-family:'DM Mono',monospace;font-size:0.62rem;font-weight:500;color:var(--or2);letter-spacing:0.07em;display:block}
-.edu-val{font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--or3);display:block;margin-top:1px}
-.edu-desc{font-family:'DM Sans',sans-serif;font-size:0.67rem;color:var(--muted);display:block;margin-top:2px}
-@keyframes fadeLabel{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+/* LOADING */
+.load-wrap{display:none;margin-top:1rem}
+.load-bar-bg{height:2px;background:var(--border);border-radius:2px;margin-bottom:0.75rem;overflow:hidden}
+.load-bar-fill{height:100%;width:0;background:var(--blue);border-radius:2px;transition:width .5s ease}
+.load-steps{display:flex;flex-direction:column;gap:0.35rem}
+.lstep{font-size:0.69rem;font-family:'IBM Plex Mono',monospace;color:var(--text4);display:flex;align-items:center;gap:7px;transition:color .2s}
+.lstep-dot{width:6px;height:6px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .2s}
+.lstep.active{color:var(--blue)}.lstep.active .lstep-dot{background:var(--blue)}
+.lstep.done{color:var(--green)}.lstep.done .lstep-dot{background:var(--green)}
+.error-wrap{display:none;margin-top:0.75rem;padding:0.7rem 1rem;background:var(--red-light);border:1px solid #FECACA;border-left:3px solid var(--red);border-radius:5px;font-size:0.77rem;color:var(--red)}
 
-.canvas-hint{
-  position:absolute;bottom:4.5rem;left:50%;transform:translateX(-50%);
-  z-index:10;pointer-events:none;
-  font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.16em;text-transform:uppercase;
-  color:rgba(122,136,153,0.45);white-space:nowrap;
-}
-.canvas-hint b{color:rgba(249,115,22,0.5)}
+/* OUTPUT PLACEHOLDER */
+.out-placeholder{background:var(--white);border:1px solid var(--border);border-radius:8px;min-height:440px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2.5rem;box-shadow:0 1px 3px rgba(20,86,203,0.04)}
+.placeholder-icon{width:56px;height:56px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.placeholder-icon svg{width:28px;height:28px;stroke:var(--blue);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.out-placeholder h3{font-family:'Source Serif 4',serif;font-size:1rem;color:var(--text3);margin-bottom:0.4rem;font-weight:400}
+.out-placeholder p{font-size:0.77rem;color:var(--text4);line-height:1.7;max-width:240px}
 
-.hero-stats{
-  position:absolute;bottom:0;left:0;right:0;z-index:10;
-  display:flex;justify-content:center;
-  border-top:1px solid rgba(249,115,22,0.08);
-  background:rgba(14,17,23,0.88);backdrop-filter:blur(10px);
-}
-.hstat{padding:0.85rem 2.5rem;text-align:center;border-right:1px solid rgba(249,115,22,0.08)}
-.hstat:last-child{border-right:none}
-.hstat-n{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--or);line-height:1;text-shadow:0 0 20px rgba(249,115,22,0.3)}
-.hstat-l{font-size:0.58rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:0.2rem;font-family:'DM Mono',monospace}
+/* RESULT PANEL */
+.result-panel{display:none;background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(20,86,203,0.04)}
+.result-top{background:var(--navy);padding:1.1rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+.result-formula{font-family:'Source Serif 4',serif;font-size:1.65rem;font-weight:600;color:white}
+.result-meta{font-size:0.72rem;font-family:'IBM Plex Mono',monospace;color:#93B4D4;margin-top:3px}
+.result-badges{display:flex;gap:0.4rem;flex-wrap:wrap}
+.badge{font-size:0.63rem;padding:3px 9px;border-radius:3px;font-weight:500;font-family:'IBM Plex Mono',monospace}
+.badge.valid{background:rgba(5,122,85,0.25);color:#6EE7B7;border:1px solid rgba(5,122,85,0.3)}
+.badge.invalid{background:rgba(200,30,30,0.25);color:#FCA5A5;border:1px solid rgba(200,30,30,0.3)}
+.badge.warn{background:rgba(180,83,9,0.25);color:#FCD34D;border:1px solid rgba(180,83,9,0.3)}
 
-.sec{padding:5rem 6rem;max-width:1200px;margin:0 auto}
-.sec-tag{font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--or);margin-bottom:0.7rem}
-.sec-h{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;line-height:1.2;margin-bottom:0.9rem;color:var(--text)}
-.sec-p{color:var(--muted);font-size:0.92rem;line-height:1.85;max-width:580px}
+/* TABS — bigger like Materials Project */
+.tabs{display:flex;background:var(--white);border-bottom:2px solid var(--border);padding:0 1.25rem}
+.tab{font-size:0.85rem;font-weight:500;padding:1rem 0.25rem;margin-right:2rem;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:'IBM Plex Sans',sans-serif;display:flex;align-items:center;gap:7px;letter-spacing:0.01em}
+.tab svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.tab:hover{color:var(--text2)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
 
-.gen-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2.5rem}
-.gen-panel{background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;box-shadow:0 2px 24px rgba(0,0,0,0.3)}
-.panel-head{background:var(--bg2);border-bottom:1px solid var(--borderf);padding:0.85rem 1.4rem;display:flex;align-items:center;gap:0.55rem}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--or);flex-shrink:0;box-shadow:0 0 6px rgba(249,115,22,0.6)}
-.panel-title{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;color:var(--or);text-transform:uppercase}
-.panel-body{padding:1.6rem}
-.fg{display:flex;flex-direction:column;gap:0.3rem;margin-bottom:1rem}
-.fg label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)}
-.fg input,.fg textarea{
-  background:var(--bg);border:1px solid var(--borderf);
-  border-radius:4px;color:var(--text);font-size:0.85rem;padding:0.65rem 0.9rem;
-  outline:none;transition:border-color .2s;font-family:'DM Sans',sans-serif;resize:none;width:100%;
-}
-.fg input:focus,.fg textarea:focus{border-color:var(--or);box-shadow:0 0 0 2px rgba(249,115,22,0.08)}
-.fg input::placeholder,.fg textarea::placeholder{color:rgba(122,136,153,0.4)}
-.gen-btn{
-  width:100%;padding:0.85rem;margin-top:1rem;
-  background:var(--or);border:none;border-radius:4px;color:#fff;
-  font-size:0.76rem;font-weight:700;cursor:pointer;letter-spacing:0.12em;text-transform:uppercase;
-  font-family:'DM Sans',sans-serif;transition:background .2s,transform .1s,box-shadow .2s;
-  box-shadow:0 0 20px rgba(249,115,22,0.25);
-}
-.gen-btn:hover{background:var(--or3);transform:translateY(-1px);box-shadow:0 0 28px rgba(249,115,22,0.4)}
-.gen-btn:disabled{opacity:0.25;cursor:not-allowed;transform:none;box-shadow:none}
-.load-wrap{display:none;padding-top:1rem}
-.load-bar{width:100%;height:1px;background:var(--faint);margin-bottom:0.9rem}
-.load-fill{height:100%;width:0%;background:var(--or);transition:width .6s ease;box-shadow:0 0 6px rgba(249,115,22,0.6)}
-.load-steps{display:flex;gap:0.85rem;flex-wrap:wrap}
-.lstep{font-family:'DM Mono',monospace;font-size:0.62rem;color:rgba(122,136,153,0.35);letter-spacing:0.05em;transition:color .3s}
-.lstep.active{color:var(--or)}.lstep.done{color:var(--muted)}
-.out-panel{background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;display:none;box-shadow:0 2px 24px rgba(0,0,0,0.3)}
-.out-ph{display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px dashed rgba(249,115,22,0.12);border-radius:6px;min-height:200px}
-.out-ph p{font-family:'DM Mono',monospace;font-size:0.63rem;color:rgba(122,136,153,0.4);letter-spacing:0.08em;text-align:center;line-height:2}
-.out-head{background:var(--bg2);border-bottom:1px solid var(--borderf);padding:0.85rem 1.4rem;display:flex;align-items:center;justify-content:space-between}
-.out-lbl{font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.1em;color:var(--or);text-transform:uppercase}
-.out-acts{display:flex;gap:0.4rem}
-.act{padding:0.28rem 0.8rem;border-radius:3px;font-size:0.62rem;font-weight:600;font-family:'DM Sans',sans-serif;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;transition:all .15s}
-.act.cp{background:transparent;border:1px solid var(--border);color:var(--or)}
-.act.cp:hover{background:rgba(249,115,22,0.08)}
-.act.dl{background:var(--or);border:1px solid var(--or);color:#fff;box-shadow:0 0 12px rgba(249,115,22,0.3)}
-.act.dl:hover{background:var(--or3)}
-.cif-pre{padding:1.2rem 1.4rem;font-family:'DM Mono',monospace;font-size:0.7rem;color:#C4873A;line-height:1.8;max-height:400px;overflow-y:auto;background:var(--bg);white-space:pre}
-.viewer-panel{background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;display:none;box-shadow:0 2px 24px rgba(0,0,0,0.3);margin-top:1.5rem;grid-column:1/-1}
-.viewer-head{background:var(--bg2);border-bottom:1px solid var(--borderf);padding:0.85rem 1.4rem;display:flex;align-items:center;gap:0.55rem}
-#viewer-canvas{width:100%;height:340px;background:var(--bg);display:block;cursor:grab}
+/* VIEWER */
+.viewer-wrap{padding:1.25rem}
+#viewer-canvas{width:100%;height:360px;border-radius:6px;background:#EEF2FA;border:1px solid var(--border);display:block;cursor:grab}
 #viewer-canvas:active{cursor:grabbing}
-.viewer-info{font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);padding:0.6rem 1.4rem;border-top:1px solid var(--borderf);letter-spacing:0.06em}
-.err-msg{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:4px;padding:0.6rem 0.9rem;font-family:'DM Mono',monospace;font-size:0.65rem;color:#f87171;margin-top:0.5rem;display:none}
+.viewer-bottom{margin-top:0.6rem;display:flex;align-items:center;justify-content:space-between}
+.viewer-info{font-size:0.68rem;font-family:'IBM Plex Mono',monospace;color:var(--text4)}
+.viewer-hint{font-size:0.67rem;color:var(--text4);font-style:italic}
 
-.about-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:2.5rem;background:rgba(249,115,22,0.08);border-radius:6px;overflow:hidden}
-.acard{background:var(--card);padding:1.8rem 1.5rem;transition:background .2s}
-.acard:hover{background:var(--bg2)}
-.an{font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--or);letter-spacing:0.1em;margin-bottom:0.7rem}
-.at{font-size:0.9rem;font-weight:600;margin-bottom:0.5rem;line-height:1.3;color:var(--text)}
-.ad{font-size:0.78rem;color:var(--muted);line-height:1.65}
+/* PROPERTIES */
+.props-wrap{padding:1.25rem;display:none}
+.props-sub-head{font-size:0.7rem;font-weight:600;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;margin-bottom:0.75rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:6px}
+.props-sub-head:first-child{border-top:none;margin-top:0;padding-top:0}
+.props-sub-head::before{content:'';width:3px;height:12px;background:var(--blue);border-radius:2px;flex-shrink:0}
+.prop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem}
+.prop-card{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.7rem 0.9rem}
+.prop-label{font-size:0.62rem;font-family:'IBM Plex Mono',monospace;color:var(--text4);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
+.prop-val{font-size:0.88rem;font-weight:500;color:var(--text);font-family:'IBM Plex Mono',monospace}
 
-footer{border-top:1px solid rgba(249,115,22,0.08);text-align:center;padding:2rem;color:rgba(122,136,153,0.4);font-size:0.65rem;font-family:'DM Mono',monospace;letter-spacing:0.08em}
-footer b{color:var(--or)}
+/* CIF */
+.cif-wrap{padding:1.25rem;display:none}
+.cif-actions{display:flex;gap:0.5rem;margin-bottom:0.75rem}
+.cif-btn{font-size:0.73rem;padding:5px 12px;border-radius:4px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-weight:500;transition:all .15s;border:1px solid var(--border2);background:var(--white);color:var(--text2);display:flex;align-items:center;gap:5px}
+.cif-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.cif-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.cif-btn.primary{background:var(--blue);color:white;border-color:var(--blue)}
+.cif-btn.primary:hover{background:var(--blue2)}
+.cif-btn.primary svg{stroke:white}
+#cifOut{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:1rem;font-size:0.7rem;font-family:'IBM Plex Mono',monospace;color:var(--text2);white-space:pre;overflow:auto;max-height:300px;line-height:1.65}
+
+/* HOW IT WORKS */
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.step-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:2.5rem 2rem;border-top:4px solid var(--blue)}
+.step-num{width:40px;height:40px;border-radius:50%;background:var(--blue-light);color:var(--blue);font-size:0.9rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;font-family:'IBM Plex Mono',monospace}
+.step-title{font-size:1.15rem;font-weight:600;color:var(--text);margin-bottom:0.6rem;font-family:'Source Serif 4',serif}
+.step-desc{font-size:0.92rem;color:var(--text3);line-height:1.8}
+
+/* FOOTER */
+.footer{background:var(--navy);padding:2.5rem;text-align:center;color:#93B4D4}
+.footer h3{font-family:'Source Serif 4',serif;font-size:1.05rem;color:white;margin-bottom:0.5rem;font-weight:400}
+.footer p{font-size:0.78rem;line-height:1.7;max-width:560px;margin:0 auto 1.5rem}
+.footer a{color:#7DD3FC;text-decoration:none}
+.footer a:hover{text-decoration:underline}
+.footer-links{display:flex;justify-content:center;gap:2rem}
+.footer-link{font-size:0.78rem;color:#7DD3FC;text-decoration:none;display:flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace}
+.footer-link:hover{color:white}
+
+@media(max-width:820px){
+  .two-col{grid-template-columns:1fr}
+  .hero-title{font-size:1.9rem}
+  .hero-stats{gap:0}
+  .hstat{padding:0 1.2rem}
+  .steps-grid{grid-template-columns:1fr}
+  .page-section{padding:1.5rem 1rem 0}
+  nav{padding:0 1rem}
+  .prop-grid{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
 
+<!-- NAV -->
 <nav>
-  <div class="logo">CRYS<b>TEXT</b></div>
-  <div class="nav-links">
-    <a href="#hero">Crystal</a>
-    <a href="#generator">Generator</a>
-    <a href="#about">About</a>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 24 24"><polygon points="12,2 22,8 22,16 12,22 2,16 2,8"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/></svg>
+    </div>
+    <span class="nav-logo-text">Crys<span>Text</span></span>
   </div>
+  <div class="nav-center">
+    <span class="nav-item active">Home</span>
+    <span class="nav-item" onclick="document.getElementById('generate').scrollIntoView({behavior:'smooth'})">Generate</span>
+    <span class="nav-item" onclick="document.getElementById('howitworks').scrollIntoView({behavior:'smooth'})">How it Works</span>
+  </div>
+  <div></div>
 </nav>
 
-<section id="hero">
-  <canvas id="particle-canvas"></canvas>
-
-  <!-- Central VESTA-style crystal structure -->
-  <canvas id="crystal-canvas" class="gem-center" width="192" height="192" style="width:380px;height:380px;border-radius:50%;"></canvas>
-
-  <div class="hero-brand">
-    <div class="hero-brand-name">CRYS<b>TEXT</b></div>
-    <div class="hero-brand-sub">Text-conditioned crystal structure generation</div>
-  </div>
-
-  <div class="edu-label" style="top:22%;left:5%;animation-delay:1.0s">
-    <div class="edu-box">
-      <span class="edu-key">a = b = c = 5.640 Å</span>
-      <span class="edu-val">Lattice parameters</span>
-      <span class="edu-desc">FCC — all three axes equal</span>
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-eyebrow">AI-Powered Materials Science</div>
+      <h1 class="hero-title">Generate <span>Crystal Structures</span><br>from Natural Language</h1>
+      <p class="hero-desc">Enter a chemical formula and space group number. CrysText uses a fine-tuned large language model to generate complete CIF crystal structure files in seconds — no DFT simulation required.</p>
+      <a class="hero-cta" onclick="document.getElementById('generate').scrollIntoView({behavior:'smooth'})" href="#">
+        <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+        Generate a Structure
+      </a>
+      <div class="hero-stats">
+        <div class="hstat"><div class="hstat-n">27,136</div><div class="hstat-l">Training Samples</div></div>
+        <div class="hstat"><div class="hstat-n">68%</div><div class="hstat-l">Match Rate</div></div>
+        <div class="hstat"><div class="hstat-n">230</div><div class="hstat-l">Space Groups</div></div>
+        <div class="hstat"><div class="hstat-n">7B</div><div class="hstat-l">Params</div></div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <canvas id="crystalShapes" style="width:100%;height:240px;display:block"></canvas>
+      <div class="hero-right-labels">
+        <span style="color:#60A5FA;font-size:0.65rem;font-family:'IBM Plex Mono',monospace">Cubic</span>
+        <span style="color:#818CF8;font-size:0.65rem;font-family:'IBM Plex Mono',monospace">Octahedral</span>
+        <span style="color:#34D399;font-size:0.65rem;font-family:'IBM Plex Mono',monospace">Tetrahedral</span>
+      </div>
     </div>
   </div>
-  <div class="edu-label" style="top:22%;right:5%;animation-delay:1.4s">
-    <div class="edu-box">
-      <span class="edu-key">Space Group: Fm-3m (225)</span>
-      <span class="edu-val">Symmetry operations</span>
-      <span class="edu-desc">Face-centred cubic symmetry</span>
-    </div>
-  </div>
-  <div class="edu-label" style="top:46%;left:3%;animation-delay:1.8s">
-    <div class="edu-box">
-      <span class="edu-key">Bond length: 2.820 Å</span>
-      <span class="edu-val">Na–Cl ionic bond</span>
-      <span class="edu-desc">Nearest-neighbour distance</span>
-    </div>
-  </div>
-  <div class="edu-label" style="top:46%;right:3%;animation-delay:2.2s">
-    <div class="edu-box">
-      <span class="edu-key">α = β = γ = 90°</span>
-      <span class="edu-val">Cell angles</span>
-      <span class="edu-desc">Cubic — all right angles</span>
-    </div>
-  </div>
-  <div class="edu-label" style="bottom:25%;left:5%;animation-delay:2.6s">
-    <div class="edu-box">
-      <span class="edu-key">Fractional coordinates</span>
-      <span class="edu-val">Na:(0,0,0) · Cl:(½,½,½)</span>
-      <span class="edu-desc">Atomic positions in unit cell</span>
-    </div>
-  </div>
-  <div class="edu-label" style="bottom:25%;right:5%;animation-delay:3.0s">
-    <div class="edu-box">
-      <span class="edu-key">→ CIF File</span>
-      <span class="edu-val">Crystallographic Information File</span>
-      <span class="edu-desc">All of the above — predicted by CrysText</span>
-    </div>
-  </div>
+</div>
 
-  <div class="canvas-hint"><b>click</b> anywhere to create a shockwave</div>
-
-  <div class="hero-stats">
-    <div class="hstat"><div class="hstat-n">27K+</div><div class="hstat-l">Training structures</div></div>
-    <div class="hstat"><div class="hstat-n">100%</div><div class="hstat-l">Composition accuracy</div></div>
-    <div class="hstat"><div class="hstat-n">7B</div><div class="hstat-l">Parameters</div></div>
-    <div class="hstat"><div class="hstat-n">MP-20</div><div class="hstat-l">Benchmark dataset</div></div>
+<!-- GENERATE SECTION -->
+<hr class="section-divider" id="generate">
+<div class="section-inner">
+  <div class="mp-section-head">
+    <div class="mp-section-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    </div>
+    <span class="mp-section-title">Crystal Structure Generation</span>
+    <span class="mp-section-desc">Enter a formula and space group to generate a CIF file</span>
   </div>
-</section>
+  <div class="two-col">
+      <!-- LEFT: INPUT -->
+      <div>
+        <div class="panel">
+          <div class="panel-head">
+            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <span class="panel-title">Input Parameters</span>
+          </div>
+          <div class="panel-body">
+            <div class="field">
+              <label>Chemical Formula</label>
+              <input id="formulaIn" type="text" placeholder="e.g. NaCl, BaTiO3, Fe2O3" autocomplete="off"/>
+              <div class="field-hint">Enter the material composition</div>
+            </div>
+            <div class="field">
+              <label>Space Group Number</label>
+              <input id="sgIn" type="text" placeholder="1 – 230" autocomplete="off"/>
+              <div class="field-hint">Integer from 1 to 230 (e.g. 225 = Fm-3m)</div>
+            </div>
+            <div class="divider"></div>
+            <div class="quick-title">Quick Examples</div>
+            <div class="quick-chips">
+              <span class="chip" onclick="setEx('NaCl','225')">NaCl · 225</span>
+              <span class="chip" onclick="setEx('GaAs','216')">GaAs · 216</span>
+              <span class="chip" onclick="setEx('BaTiO3','99')">BaTiO3 · 99</span>
+              <span class="chip" onclick="setEx('TiO2','136')">TiO2 · 136</span>
+              <span class="chip" onclick="setEx('Fe2O3','167')">Fe2O3 · 167</span>
+              <span class="chip" onclick="setEx('MgO','225')">MgO · 225</span>
+            </div>
+            <button class="gen-btn" id="genBtn" onclick="generate()">
+              <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+              Generate Crystal Structure
+            </button>
+            <div class="load-wrap" id="loadWrap">
+              <div class="load-bar-bg"><div class="load-bar-fill" id="loadFill"></div></div>
+              <div class="load-steps">
+                <div class="lstep" id="s1"><div class="lstep-dot"></div>Formatting prompt</div>
+                <div class="lstep" id="s2"><div class="lstep-dot"></div>Running model inference</div>
+                <div class="lstep" id="s3"><div class="lstep-dot"></div>Validating with pymatgen</div>
+                <div class="lstep" id="s4"><div class="lstep-dot"></div>Building 3D structure</div>
+              </div>
+            </div>
+            <div class="error-wrap" id="errWrap"></div>
+          </div>
+        </div>
 
-<section id="generator" class="sec">
-  <div class="sec-tag">Structure Generator</div>
-  <h2 class="sec-h">Describe your material, receive a CIF file</h2>
-  <p class="sec-p">Enter a chemical formula, space group number, and a natural language description. CrysText generates a downloadable CIF file ready for VESTA or pymatgen.</p>
-  <div class="gen-grid">
-    <!-- LEFT: Input panel -->
-    <div class="gen-panel" style="grid-column:1">
-      <div class="panel-head"><div class="dot"></div><div class="panel-title">Input · Material Description</div></div>
-      <div class="panel-body">
-        <div class="fg"><label>Chemical Formula</label><input type="text" id="formula" placeholder="e.g. NaCl, Fe2O3, BaTiO3"></div>
-        <div class="fg"><label>Space Group Number (1–230)</label><input type="number" id="spacegroup" placeholder="e.g. 225, 62, 12" min="1" max="230"></div>
-        <div class="err-msg" id="errMsg"></div>
-        <div class="fg"><label>Natural Language Description</label><textarea id="desc" rows="3" placeholder="e.g. Rock salt structure with face-centred cubic symmetry..."></textarea></div>
-        <button class="gen-btn" id="genBtn" onclick="runGen()">Generate CIF Structure</button>
-        <div class="load-wrap" id="loadWrap">
-          <div class="load-bar"><div class="load-fill" id="loadFill"></div></div>
-          <div class="load-steps">
-            <span class="lstep" id="ls0">Tokenizing</span>
-            <span class="lstep" id="ls1">Inference</span>
-            <span class="lstep" id="ls2">Coordinates</span>
-            <span class="lstep" id="ls3">Lattice</span>
-            <span class="lstep" id="ls4">Validating</span>
+      </div>
+
+      <!-- RIGHT: OUTPUT -->
+      <div id="outArea">
+        <div class="out-placeholder" id="placeholder">
+          <div class="placeholder-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <h3>No structure generated yet</h3>
+          <p>Enter a chemical formula and space group, then click Generate.</p>
+        </div>
+
+        <div class="result-panel" id="resultPanel">
+          <div class="result-top">
+            <div>
+              <div class="result-formula" id="resFormula">—</div>
+              <div class="result-meta" id="resSG">—</div>
+            </div>
+            <div class="result-badges" id="resBadges"></div>
+          </div>
+          <div class="tabs">
+            <div class="tab active" onclick="switchTab('viewer',this)">
+              <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              3D Structure
+            </div>
+            <div class="tab" onclick="switchTab('props',this)">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              Properties
+            </div>
+            <div class="tab" onclick="switchTab('cif',this)">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              CIF File
+            </div>
+          </div>
+          <div class="viewer-wrap" id="tabViewer">
+            <canvas id="viewer-canvas"></canvas>
+            <div class="viewer-bottom">
+              <div class="viewer-info" id="viewerInfo">—</div>
+              <div class="viewer-hint">Drag to rotate · Scroll to zoom</div>
+            </div>
+          </div>
+          <div class="props-wrap" id="tabProps">
+            <div class="props-sub-head">Cell Parameters</div>
+            <div class="prop-grid" id="propGrid"></div>
+            <div class="props-sub-head">Validation Results</div>
+            <div class="prop-grid" id="valGrid"></div>
+          </div>
+          <div class="cif-wrap" id="tabCif">
+            <div class="cif-actions">
+              <button class="cif-btn primary" onclick="dlCIF()">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download .cif
+              </button>
+              <button class="cif-btn" onclick="copyCIF()">Copy to Clipboard</button>
+            </div>
+            <pre id="cifOut"></pre>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- RIGHT: CIF output panel -->
-    <div class="out-panel" id="outPanel" style="grid-column:2">
-      <div class="out-head">
-        <span class="out-lbl">Generated CIF · Output</span>
-        <div class="out-acts">
-          <button class="act cp" onclick="copyCIF()">Copy</button>
-          <button class="act dl" onclick="dlCIF()">Download .cif</button>
-        </div>
-      </div>
-      <div class="cif-pre" id="cifOut"></div>
+<!-- HOW IT WORKS SECTION -->
+<hr class="section-divider" id="howitworks">
+<div class="section-inner-last">
+  <div class="mp-section-head">
+    <div class="mp-section-icon">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
     </div>
-
-    <!-- RIGHT placeholder before generation -->
-    <div class="out-ph" id="outPH" style="grid-column:2">
-      <p>CIF output will appear here<br>Fill the form and click Generate</p>
+    <span class="mp-section-title">How CrysText Works</span>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-title">Text Input</div>
+      <div class="step-desc">Enter a chemical formula and space group number. CrysText formats this as an Alpaca instruction prompt — the same format used during training.</div>
     </div>
-
-    <!-- FULL WIDTH: 3D viewer below both panels -->
-    <div class="viewer-panel" id="viewerPanel" style="grid-column:1/-1;margin-top:1rem">
-      <div class="viewer-head"><div class="dot"></div><div class="panel-title">3D Structure Viewer · Interactive · Drag to rotate · Scroll to zoom</div></div>
-      <canvas id="viewer-canvas" style="width:100%;height:380px;display:block;cursor:grab;background:#0E1117"></canvas>
-      <div class="viewer-info" id="viewerInfo" style="font-family:'DM Mono',monospace;font-size:0.6rem;color:#7A8899;padding:0.6rem 1.4rem;border-top:1px solid rgba(249,115,22,0.1);letter-spacing:0.06em"></div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-title">LLM Generation</div>
+      <div class="step-desc">Fine-tuned Mistral-7B generates CIF text token by token using greedy decoding. Trained on 27,136 crystal structures from the MP-20 benchmark using QLoRA.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-title">Validation & Visualization</div>
+      <div class="step-desc">Pymatgen validates the CIF, converts it to a conventional cell, and detects the actual space group. The 3D viewer renders the ball-and-stick model interactively.</div>
     </div>
   </div>
-</section>
+</div>
 
-<section id="about" class="sec">
-  <div class="sec-tag">What is CrysText</div>
-  <h2 class="sec-h">Crystal prediction, reimagined with language</h2>
-  <p class="sec-p">Traditional crystal structure prediction requires expensive DFT calculations and deep domain expertise. CrysText replaces that with a single natural language prompt.</p>
-  <div class="about-grid">
-    <div class="acard"><div class="an">01 ·</div><div class="at">Text-conditioned generation</div><div class="ad">Describe any material in plain English. The model generates lattice parameters, space group, and atom coordinates automatically.</div></div>
-    <div class="acard"><div class="an">02 ·</div><div class="at">Fine-tuned Mistral-7B</div><div class="ad">Built on Mistral-7B-v0.3 with QLoRA (r=16), trained on the full MP-20 benchmark of 27,136 real crystal structures.</div></div>
-    <div class="acard"><div class="an">03 ·</div><div class="at">Standard CIF output</div><div class="ad">Outputs industry-standard CIF files directly importable into VESTA, Materials Studio, or pymatgen.</div></div>
-    <div class="acard"><div class="an">04 ·</div><div class="at">Materials informatics</div><div class="ad">Part of the push to accelerate materials discovery using AI — faster and more accessible than classical DFT methods.</div></div>
+<!-- FOOTER -->
+<div class="footer">
+  <h3>CrysText — Text-Conditioned Crystal Structure Generation</h3>
+  <p>Fine-tuned on the Materials Project MP-20 benchmark dataset. Based on the research by Mohanty et al. (2025).</p>
+  <div class="footer-links">
+    <a href="https://github.com/rakshitha-dev9/Crystext" target="_blank" class="footer-link">GitHub ↗</a>
+    <a href="https://huggingface.co/Charanya-2026/crystext-mistral-27k" target="_blank" class="footer-link">HuggingFace ↗</a>
+    <a href="https://doi.org/10.26434/chemrxiv-2024-gjhpq-v2" target="_blank" class="footer-link">Paper ↗</a>
   </div>
-</section>
-
-<footer>CRYSTEXT &nbsp;·&nbsp; Materials Informatics Project &nbsp;·&nbsp; Mistral-7B + QLoRA</footer>
+</div>
 
 <script>
-/* ═══════════════════════════════════════
-   MAGNETIC PARTICLE FIELD
-   700 particles orbit the central crystal
-   Cursor repels nearby particles like a magnet
-   Click = shockwave explosion + reform
-   Particles: 3 types — orange, indigo, dim
-   Each has own orbit radius, drift, speed
-═══════════════════════════════════════ */
-const canvas = document.getElementById('particle-canvas');
-const ctx = canvas.getContext('2d');
+const API='http://localhost:5000';
+let curF='structure',curCIF='';
 
-let W, H, cx, cy;
-function resize(){
-  const hero = document.getElementById('hero');
-  W = canvas.width  = hero.clientWidth;
-  H = canvas.height = hero.clientHeight;
-  cx = W/2; cy = H/2;
-}
-resize(); window.addEventListener('resize', resize);
+function setEx(f,sg){document.getElementById('formulaIn').value=f;document.getElementById('sgIn').value=sg}
+function showErr(msg){const e=document.getElementById('errWrap');e.style.display='block';e.textContent='⚠ '+msg}
+function hideErr(){document.getElementById('errWrap').style.display='none'}
 
-// Mouse
-let mx = -9999, my = -9999;
-document.getElementById('hero').addEventListener('mousemove', e=>{
-  const r = canvas.getBoundingClientRect();
-  mx = e.clientX - r.left;
-  my = e.clientY - r.top;
-});
-document.getElementById('hero').addEventListener('mouseleave', ()=>{ mx=-9999; my=-9999; });
-
-// Click shockwave
-let shockX=0, shockY=0, shockR=0, shockAlpha=0;
-document.getElementById('hero').addEventListener('click', e=>{
-  const r=canvas.getBoundingClientRect();
-  shockX=e.clientX-r.left; shockY=e.clientY-r.top;
-  shockR=0; shockAlpha=1;
-  // Explode nearby particles
-  particles.forEach(p=>{
-    const dx=p.x-shockX, dy=p.y-shockY;
-    const dist=Math.sqrt(dx*dx+dy*dy);
-    if(dist<180){
-      const force=(180-dist)/180*12;
-      p.vx+=(dx/dist)*force;
-      p.vy+=(dy/dist)*force;
-    }
-  });
-});
-
-// Particle types
-const TYPES = [
-  { color:'rgba(249,115,22,', size:1.8, speed:0.00035, orbitScale:1.0 },  // orange
-  { color:'rgba(129,140,248,', size:1.4, speed:0.00028, orbitScale:0.75 }, // indigo
-  { color:'rgba(100,116,139,', size:1.1, speed:0.00042, orbitScale:1.25 }, // slate
-];
-
-const N = 700;
-const particles = Array.from({length:N}, (_, i) => {
-  const typeIdx = i < 280 ? 0 : i < 490 ? 1 : 2;
-  const type = TYPES[typeIdx];
-  // Orbital initial position — spread in rings around center
-  const angle = Math.random() * Math.PI * 2;
-  const orbitR = (80 + Math.random() * 340) * type.orbitScale;
-  return {
-    typeIdx,
-    // Home position (on orbit)
-    homeAngle: angle,
-    homeR: orbitR,
-    // Current position
-    x: cx + Math.cos(angle) * orbitR,
-    y: cy + Math.sin(angle) * orbitR,
-    // Velocity
-    vx: 0, vy: 0,
-    // Drift angle for slow orbit
-    driftAngle: angle,
-    driftSpeed: (Math.random() > 0.5 ? 1 : -1) * type.speed * (0.7 + Math.random() * 0.6),
-    // Base opacity
-    baseAlpha: 0.35 + Math.random() * 0.5,
-    // Phase for twinkle
-    phase: Math.random() * Math.PI * 2,
-    size: type.size * (0.7 + Math.random() * 0.6),
-  };
-});
-
-const REPEL_RADIUS = 130;
-const REPEL_FORCE  = 5.5;
-const RETURN_FORCE = 0.022;
-const DAMPING      = 0.88;
-const CORE_RADIUS  = 105; // particles don't enter this
-
-let frame = 0;
-function animate(){
-  requestAnimationFrame(animate);
-  frame++;
-  const t = frame * 0.012;
-
-  // Clear with slight trail fade for motion blur feel
-  ctx.fillStyle = 'rgba(14,17,23,0.38)';
-  ctx.fillRect(0,0,W,H);
-
-  // Shockwave ring
-  if(shockAlpha > 0){
-    shockR += 8;
-    shockAlpha -= 0.022;
-    ctx.beginPath();
-    ctx.arc(shockX, shockY, shockR, 0, Math.PI*2);
-    ctx.strokeStyle = `rgba(249,115,22,${shockAlpha * 0.6})`;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    // Second ring slightly behind
-    ctx.beginPath();
-    ctx.arc(shockX, shockY, shockR*0.7, 0, Math.PI*2);
-    ctx.strokeStyle = `rgba(249,115,22,${shockAlpha * 0.3})`;
-    ctx.lineWidth = 0.8;
-    ctx.stroke();
+function setStep(n){
+  for(let i=1;i<=4;i++){
+    const el=document.getElementById('s'+i);
+    if(i<n)el.className='lstep done';
+    else if(i===n)el.className='lstep active';
+    else el.className='lstep';
   }
-
-  particles.forEach(p => {
-    const type = TYPES[p.typeIdx];
-
-    // Slow orbit drift — update home position
-    p.driftAngle += p.driftSpeed;
-    const homeX = cx + Math.cos(p.driftAngle) * p.homeR;
-    const homeY = cy + Math.sin(p.driftAngle) * p.homeR;
-
-    // Spring return toward home
-    const dxH = homeX - p.x;
-    const dyH = homeY - p.y;
-    p.vx += dxH * RETURN_FORCE;
-    p.vy += dyH * RETURN_FORCE;
-
-    // Damping
-    p.vx *= DAMPING;
-    p.vy *= DAMPING;
-
-    // Move
-    p.x += p.vx;
-    p.y += p.vy;
-
-    // Keep within hero bounds loosely
-    if(p.x < 0) p.vx += 0.5;
-    if(p.x > W) p.vx -= 0.5;
-    if(p.y < 0) p.vy += 0.5;
-    if(p.y > H) p.vy -= 0.5;
-
-    // Draw particle
-    const speed = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
-    const twinkle = 0.6 + 0.4*Math.sin(t*2.5 + p.phase);
-    const alpha = Math.min(1, p.baseAlpha * twinkle * (1 + speed*0.08));
-
-    // Elongate fast-moving particles (motion streak)
-    if(speed > 1.2){
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(Math.atan2(p.vy, p.vx));
-      ctx.beginPath();
-      ctx.ellipse(0, 0, Math.min(p.size + speed*0.6, 8), p.size*0.5, 0, 0, Math.PI*2);
-      ctx.fillStyle = `${type.color}${alpha})`;
-      ctx.fill();
-      ctx.restore();
-    } else {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-      ctx.fillStyle = `${type.color}${alpha})`;
-      ctx.fill();
-    }
-
-    // Glow halo for orange particles when fast
-    if(p.typeIdx === 0 && speed > 2){
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size*3, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(249,115,22,${alpha*0.08})`;
-      ctx.fill();
-    }
-  });
-
-}
-animate();
-
-/* ═══ CLEAN NaCl UNIT CELL ═══ */
-(function(){
-  const cc = document.getElementById('crystal-canvas');
-  const cx2 = cc.getContext('2d');
-  const S = 500;
-  cc.width = S; cc.height = S;
-  const half = S / 2;
-  let angle = 0;
-
-  // NaCl FCC unit cell — exact positions
-  // Na at corners + face centres (even parity)
-  // Cl at edge centres + body centre (odd parity)
-  const lattice = [
-    // 8 corners — alternating Na/Cl
-    {fx:-0.5,fy:-0.5,fz:-0.5,type:'Na'},
-    {fx: 0.5,fy:-0.5,fz:-0.5,type:'Cl'},
-    {fx:-0.5,fy: 0.5,fz:-0.5,type:'Cl'},
-    {fx: 0.5,fy: 0.5,fz:-0.5,type:'Na'},
-    {fx:-0.5,fy:-0.5,fz: 0.5,type:'Cl'},
-    {fx: 0.5,fy:-0.5,fz: 0.5,type:'Na'},
-    {fx:-0.5,fy: 0.5,fz: 0.5,type:'Na'},
-    {fx: 0.5,fy: 0.5,fz: 0.5,type:'Cl'},
-    // 6 face centres
-    {fx: 0.5,fy: 0,  fz: 0,  type:'Na'},
-    {fx:-0.5,fy: 0,  fz: 0,  type:'Na'},
-    {fx: 0,  fy: 0.5,fz: 0,  type:'Na'},
-    {fx: 0,  fy:-0.5,fz: 0,  type:'Na'},
-    {fx: 0,  fy: 0,  fz: 0.5,type:'Na'},
-    {fx: 0,  fy: 0,  fz:-0.5,type:'Na'},
-    // edge midpoints (Cl)
-    {fx: 0,  fy:-0.5,fz:-0.5,type:'Cl'},
-    {fx: 0,  fy: 0.5,fz:-0.5,type:'Cl'},
-    {fx: 0,  fy:-0.5,fz: 0.5,type:'Cl'},
-    {fx: 0,  fy: 0.5,fz: 0.5,type:'Cl'},
-    {fx:-0.5,fy: 0,  fz:-0.5,type:'Cl'},
-    {fx: 0.5,fy: 0,  fz:-0.5,type:'Cl'},
-    {fx:-0.5,fy: 0,  fz: 0.5,type:'Cl'},
-    {fx: 0.5,fy: 0,  fz: 0.5,type:'Cl'},
-    {fx:-0.5,fy:-0.5,fz: 0,  type:'Cl'},
-    {fx: 0.5,fy:-0.5,fz: 0,  type:'Cl'},
-    {fx:-0.5,fy: 0.5,fz: 0,  type:'Cl'},
-    {fx: 0.5,fy: 0.5,fz: 0,  type:'Cl'},
-    // body centre
-    {fx: 0,  fy: 0,  fz: 0,  type:'Cl'},
-  ];
-
-  // Bonds — connect Na to Cl only if distance = 0.5
-  const bonds = [];
-  for(let i=0;i<lattice.length;i++) for(let j=i+1;j<lattice.length;j++){
-    if(lattice[i].type===lattice[j].type) continue;
-    const a=lattice[i],b=lattice[j];
-    const d2=(a.fx-b.fx)**2+(a.fy-b.fy)**2+(a.fz-b.fz)**2;
-    if(Math.abs(d2-0.25)<0.01) bonds.push([i,j]);
-  }
-
-  const SCALE = 170;
-  const TILT  = 0.38;
-
-  function project(fx,fy,fz,rot){
-    const cosA=Math.cos(rot),sinA=Math.sin(rot);
-    const rx=fx*cosA-fz*sinA, ry=fy, rz=fx*sinA+fz*cosA;
-    const cosT=Math.cos(TILT),sinT=Math.sin(TILT);
-    const ty=ry*cosT-rz*sinT, tz=ry*sinT+rz*cosT;
-    const p=1+tz*0.18;
-    return {sx:half+rx*SCALE*p, sy:half+ty*SCALE*p, depth:tz, persp:p};
-  }
-
-  function drawSphere(x,y,r,isNa){
-    const hx=x-r*0.32, hy=y-r*0.36;
-    // sphere body
-    const sph=cx2.createRadialGradient(hx,hy,r*0.02,x,y,r);
-    if(isNa){
-      sph.addColorStop(0,'rgba(255,225,160,1)');
-      sph.addColorStop(0.28,'rgba(251,146,60,1)');
-      sph.addColorStop(0.7,'rgba(220,80,10,1)');
-      sph.addColorStop(1,'rgba(100,30,2,1)');
-    } else {
-      sph.addColorStop(0,'rgba(220,222,255,1)');
-      sph.addColorStop(0.28,'rgba(139,148,255,1)');
-      sph.addColorStop(0.7,'rgba(79,70,229,1)');
-      sph.addColorStop(1,'rgba(25,18,85,1)');
-    }
-    cx2.beginPath(); cx2.arc(x,y,r,0,Math.PI*2);
-    cx2.fillStyle=sph; cx2.fill();
-    // specular
-    const sp=cx2.createRadialGradient(hx,hy,0,hx,hy,r*0.4);
-    sp.addColorStop(0,'rgba(255,255,255,0.88)');
-    sp.addColorStop(0.5,'rgba(255,255,255,0.2)');
-    sp.addColorStop(1,'rgba(255,255,255,0)');
-    cx2.beginPath(); cx2.arc(hx,hy,r*0.4,0,Math.PI*2);
-    cx2.fillStyle=sp; cx2.fill();
-    // rim
-    cx2.beginPath(); cx2.arc(x,y,r,0,Math.PI*2);
-    cx2.strokeStyle=isNa?'rgba(150,50,3,0.5)':'rgba(45,30,140,0.5)';
-    cx2.lineWidth=1; cx2.stroke();
-  }
-
-  function drawFrame(){
-    cx2.clearRect(0,0,S,S);
-    const proj=lattice.map(a=>({...a,...project(a.fx,a.fy,a.fz,angle)}));
-    const sorted=[...proj].sort((a,b)=>a.depth-b.depth);
-
-    // bonds
-    for(const [i,j] of bonds){
-      const a=proj[i],b=proj[j];
-      const g=cx2.createLinearGradient(a.sx,a.sy,b.sx,b.sy);
-      g.addColorStop(0,a.type==='Na'?'rgba(249,115,22,0.5)':'rgba(110,118,245,0.5)');
-      g.addColorStop(1,b.type==='Na'?'rgba(249,115,22,0.5)':'rgba(110,118,245,0.5)');
-      cx2.beginPath(); cx2.moveTo(a.sx,a.sy); cx2.lineTo(b.sx,b.sy);
-      cx2.strokeStyle=g; cx2.lineWidth=2; cx2.stroke();
-    }
-
-    // atoms
-    for(const atom of sorted){
-      const isNa=atom.type==='Na';
-      // corner/edge atoms slightly smaller than face/body
-      const isCorner=Math.abs(atom.fx)===0.5&&Math.abs(atom.fy)===0.5&&Math.abs(atom.fz)===0.5;
-      const r=(isNa?18:15)*atom.persp;
-      drawSphere(atom.sx,atom.sy,r,isNa);
-    }
-
-    angle+=0.0008;
-    requestAnimationFrame(drawFrame);
-  }
-  drawFrame();
-})();
-
-/* ═══ GENERATOR ═══ */
-let curF='structure';
-
-/* ═══ INPUT VALIDATION ═══ */
-function showErr(msg){
-  const e=document.getElementById('errMsg');
-  e.textContent=msg; e.style.display='block';
-}
-function clearErr(){
-  document.getElementById('errMsg').style.display='none';
+  document.getElementById('loadFill').style.width=((n-1)/4*100)+'%';
 }
 
-// Basic element checker — catches garbage like random strings
-const VALID_ELEMENTS = new Set([
-  'H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar',
-  'K','Ca','Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br',
-  'Kr','Rb','Sr','Y','Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd','In','Sn','Sb','Te',
-  'I','Xe','Cs','Ba','La','Ce','Pr','Nd','Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm',
-  'Yb','Lu','Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po','At','Rn',
-  'Fr','Ra','Ac','Th','Pa','U','Np','Pu','Am','Cm','Bk','Cf','Es','Fm','Md','No','Lr'
-]);
-
-function validateFormula(formula) {
-  // Extract all element symbols (capital letter optionally followed by lowercase)
-  const tokens = formula.match(/[A-Z][a-z]?/g);
-  if (!tokens || tokens.length === 0) return false;
-  for (const t of tokens) {
-    if (!VALID_ELEMENTS.has(t)) return false;
-  }
-  return true;
-}
-
-async function runGen(){
-  clearErr();
-  const f=document.getElementById('formula').value.trim();
-  const sgRaw=document.getElementById('spacegroup').value.trim();
-
-  // Validate formula
-  if(!f){ showErr('Please enter a chemical formula.'); return; }
-  if(!validateFormula(f)){
-    showErr(`"${f}" contains invalid element symbols. Please check your formula.`);
-    return;
-  }
-
-  // Validate space group 1-230
-  const sg = parseInt(sgRaw);
-  if(!sgRaw || isNaN(sg) || sg < 1 || sg > 230){
-    showErr('Space group must be a number between 1 and 230.');
-    return;
-  }
-
-  curF=f||'structure';
+async function generate(){
+  const formula=document.getElementById('formulaIn').value.trim();
+  const sg=document.getElementById('sgIn').value.trim();
+  if(!formula){showErr('Please enter a formula');return}
+  if(!sg){showErr('Please enter a space group number');return}
+  hideErr();curF=formula;
   document.getElementById('genBtn').disabled=true;
   document.getElementById('loadWrap').style.display='block';
-  document.getElementById('outPanel').style.display='none';
-  document.getElementById('outPH').style.display='none';
-  document.getElementById('viewerPanel').style.display='none';
-  ['ls0','ls1','ls2','ls3','ls4'].forEach(s=>document.getElementById(s).className='lstep');
-  const fill=document.getElementById('loadFill');fill.style.width='0%';
-
-  let step=0;
-  const iv=setInterval(()=>{
-    if(step>0)document.getElementById('ls'+(step-1)).className='lstep done';
-    if(step<5)document.getElementById('ls'+step).className='lstep active';
-    fill.style.width=((step+1)/5*80)+'%';
-    step++;if(step>=5)clearInterval(iv);
-  },6000);
-
-  try {
-    const resp = await fetch('http://localhost:5000/generate', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({formula: f, spacegroup: String(sg)})
-    });
-    clearInterval(iv);
-    if(!resp.ok){
-      const err = await resp.json();
-      throw new Error(err.error || 'Server error');
-    }
-    const data = await resp.json();
-    fill.style.width='100%';
-    ['ls0','ls1','ls2','ls3','ls4'].forEach(s=>document.getElementById(s).className='lstep done');
-
-    const v = data.validation;
-    let header = '';
-    if(v.valid){
-      const conf = v.confidence || 0;
-      const confBar = '█'.repeat(Math.round(conf/10)) + '░'.repeat(10-Math.round(conf/10));
-      header += `; ╔══════════════════════════════════════╗\n`;
-      header += `; ║        CrysText Validation Report        ║\n`;
-      header += `; ╚══════════════════════════════════════╝\n`;
-      header += `; Pymatgen Parse     : VALID ✓\n`;
-      header += `; Composition Match  : ${v.composition_match ? 'YES ✓' : 'NO ✗  — check formula'}\n`;
-      header += `; Space Group Match  : ${v.spacegroup_match ? 'YES ✓' : 'NO ✗  — model partial (10k training)'}\n`;
-      header += `; Requested SG       : ${v.expected_spacegroup || '?'}\n`;
-      header += `; Detected SG        : ${v.detected_spacegroup || '?'}\n`;
-      header += `; Density            : ${v.density ? v.density + ' g/cm³ ' + (v.density_ok ? '✓' : '✗ unphysical') : 'N/A'}\n`;
-      header += `; Confidence Score   : ${conf}/100  [${confBar}]\n`;
-      header += `; ──────────────────────────────────────────\n`;
-    } else {
-      header += `; CrysText generated — Pymatgen: ${v.error||'parse issue'}\n`;
-      header += `; Confidence Score   : 0/100\n`;
-      header += `; Note: CIF may still be structurally meaningful\n`;
-      header += `; ──────────────────────────────────────────\n`;
-    }
-
-    setTimeout(()=>{
-      document.getElementById('loadWrap').style.display='none';
-      document.getElementById('genBtn').disabled=false;
-      document.getElementById('cifOut').textContent = header + data.cif;
-      document.getElementById('outPH').style.display='none';
-      document.getElementById('outPanel').style.display='block';
-
-      // Launch 3D viewer if valid
-      if(v.valid && data.cif){
-        try { launch3DViewer(data.cif, f, v); } catch(e){ console.warn('3D viewer error:', e); }
-      }
-    }, 400);
-
-  } catch(e) {
-    clearInterval(iv);
-    document.getElementById('loadWrap').style.display='none';
-    document.getElementById('genBtn').disabled=false;
-    document.getElementById('outPH').style.display='flex';
-    showErr('Error: ' + e.message + ' — Make sure app.py is running on localhost:5000');
+  setStep(1);await sleep(400);setStep(2);
+  try{
+    const res=await fetch(API+'/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({formula,spacegroup:sg})});
+    const data=await res.json();
+    if(data.error){showErr(data.error);reset();return}
+    setStep(3);await sleep(300);setStep(4);await sleep(300);
+    document.getElementById('loadFill').style.width='100%';
+    await sleep(400);
+    // Store result in localStorage so structure page doesn't need to fetch again
+    localStorage.setItem('crystext_result', JSON.stringify({
+      formula, sg,
+      cif: data.cif,
+      validation: data.validation||{},
+      refinement: data.refinement||{}
+    }));
+    // Open structure page in new tab
+    const url = `structure.html?formula=${encodeURIComponent(formula)}&sg=${encodeURIComponent(sg)}`;
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    reset();
+  }catch(e){
+    showErr('Cannot connect to backend. Make sure app.py is running on port 5000.');
+    reset();
   }
 }
 
-/* SUPERCELL 3D VIEWER */
-function launch3DViewer(cifText, formula, validation) {
-  const panel = document.getElementById('viewerPanel');
-  const canvas = document.getElementById('viewer-canvas');
-  const info = document.getElementById('viewerInfo');
-  panel.style.display = 'block';
+function reset(){
+  document.getElementById('genBtn').disabled=false;
+  document.getElementById('loadWrap').style.display='none';
+  document.getElementById('placeholder').style.display='flex';
+}
 
-  const atoms = parseCIFAtoms(cifText);
-  if(!atoms || atoms.length === 0){ panel.style.display='none'; return; }
+function showResult(formula,sg,cif,val){
+  document.getElementById('genBtn').disabled=false;
+  document.getElementById('loadWrap').style.display='none';
+  document.getElementById('resFormula').textContent=val.detected_formula||formula;
+  document.getElementById('resSG').textContent='Space Group: '+(val.detected_spacegroup||sg)+' · Input: '+formula+' SG '+sg;
+  const badges=document.getElementById('resBadges');
+  badges.innerHTML='';
+  badges.innerHTML+=val.valid?'<span class="badge valid">✓ Valid CIF</span>':'<span class="badge invalid">✗ Invalid CIF</span>';
+  badges.innerHTML+=val.composition_match?'<span class="badge valid">✓ Composition Match</span>':'<span class="badge warn">⚠ Mismatch</span>';
+  document.getElementById('cifOut').textContent=cif;
+  buildProps(val,cif);
+  document.getElementById('resultPanel').style.display='block';
+  switchTab('viewer',document.querySelector('.tab'));
+  buildViewer(cif,formula,val);
+}
 
-  const EL_COLORS = {
-    Na:'#FB923C',Cl:'#818CF8',Ti:'#60A5FA',O:'#F87171',Fe:'#A78BFA',
-    Ba:'#34D399',Ca:'#FBBF24',K:'#F472B6',Li:'#67E8F9',Mg:'#86EFAC',
-    Al:'#FCA5A5',Si:'#A5F3FC',S:'#FEF08A',N:'#93C5FD',H:'#E5E7EB',
-    Cu:'#F97316',Zn:'#A3E635',Ga:'#C4B5FD',As:'#6EE7B7',Bi:'#FB7185',
-    Pb:'#94A3B8',Sn:'#FCD34D',Ge:'#6EE7B7',default:'#94A3B8'
-  };
-  const EL_RADII = {
-    Na:1.02,Cl:0.99,O:0.73,Ti:0.86,Fe:0.78,Ba:1.35,Ca:1.14,
-    K:1.33,Li:0.76,Mg:0.86,Al:0.68,Si:0.54,H:0.31,default:0.85
-  };
+function buildProps(val,cif){
+  const cellA=cif.match(/_cell_length_a\s+([\d.]+)/);
+  const cellB=cif.match(/_cell_length_b\s+([\d.]+)/);
+  const cellC=cif.match(/_cell_length_c\s+([\d.]+)/);
+  const alpha=cif.match(/_cell_angle_alpha\s+([\d.]+)/);
+  const beta=cif.match(/_cell_angle_beta\s+([\d.]+)/);
+  const gamma=cif.match(/_cell_angle_gamma\s+([\d.]+)/);
+  const vol=cif.match(/_cell_volume\s+([\d.]+)/);
+  const cp=[
+    {l:'a (Å)',v:cellA?parseFloat(cellA[1]).toFixed(3):'—'},
+    {l:'b (Å)',v:cellB?parseFloat(cellB[1]).toFixed(3):'—'},
+    {l:'c (Å)',v:cellC?parseFloat(cellC[1]).toFixed(3):'—'},
+    {l:'α (°)',v:alpha?parseFloat(alpha[1]).toFixed(2):'—'},
+    {l:'β (°)',v:beta?parseFloat(beta[1]).toFixed(2):'—'},
+    {l:'γ (°)',v:gamma?parseFloat(gamma[1]).toFixed(2):'—'},
+  ];
+  if(vol)cp.push({l:'Volume (Å³)',v:parseFloat(vol[1]).toFixed(2)});
+  document.getElementById('propGrid').innerHTML=cp.map(p=>`<div class="prop-card"><div class="prop-label">${p.l}</div><div class="prop-val">${p.v}</div></div>`).join('');
+  const vp=[
+    {l:'Valid CIF',v:val.valid?'Yes':'No'},
+    {l:'Composition Match',v:val.composition_match?'Yes':'No'},
+    {l:'Detected Formula',v:val.detected_formula||'—'},
+    {l:'Space Group',v:val.detected_spacegroup||'—'},
+  ];
+  document.getElementById('valGrid').innerHTML=vp.map(p=>`<div class="prop-card"><div class="prop-label">${p.l}</div><div class="prop-val">${p.v}</div></div>`).join('');
+}
 
-  // Build 2x2x2 supercell centered at origin
-  const supercell = [];
-  for(let ix=0;ix<2;ix++)
-    for(let iy=0;iy<2;iy++)
-      for(let iz=0;iz<2;iz++)
-        for(const a of atoms)
-          supercell.push({element:a.element, x:(a.x+ix)-0.5, y:(a.y+iy)-0.5, z:(a.z+iz)-0.5});
+function switchTab(tab,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  if(el)el.classList.add('active');
+  document.getElementById('tabViewer').style.display=tab==='viewer'?'block':'none';
+  document.getElementById('tabProps').style.display=tab==='props'?'block':'none';
+  document.getElementById('tabCif').style.display=tab==='cif'?'block':'none';
+}
 
-  const SF = 2.4;
-  const sc = supercell.map(a=>({...a,x:a.x*SF,y:a.y*SF,z:a.z*SF}));
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 
-  // Precompute bonds
-  const bonds = [];
-  for(let i=0;i<sc.length;i++)
-    for(let j=i+1;j<sc.length;j++){
-      const a=sc[i],b=sc[j];
-      const d=Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2+(a.z-b.z)**2);
-      const thresh=((EL_RADII[a.element]||0.85)+(EL_RADII[b.element]||0.85))*1.1;
-      if(d<thresh) bonds.push([i,j]);
-    }
-
-  info.textContent = sc.length+' atoms · '+bonds.length+' bonds · 2×2×2 supercell · SG: '+(validation.detected_spacegroup||'?')+' · '+formula;
-
-  const W=canvas.offsetWidth||900, H=380;
-  canvas.width=W; canvas.height=H;
+function buildViewer(cifText,formula,validation){
+  const canvas=document.getElementById('viewer-canvas');
+  const info=document.getElementById('viewerInfo');
+  const atoms=parseCIFAtoms(cifText);
+  if(!atoms||atoms.length===0){info.textContent='Could not parse atom positions from CIF';return}
+  const EL_COLORS={Na:'#F97316',Cl:'#818CF8',Ti:'#60A5FA',O:'#F87171',Fe:'#A78BFA',Ba:'#34D399',Ca:'#FBBF24',K:'#F472B6',Li:'#67E8F9',Mg:'#86EFAC',Al:'#FCA5A5',Si:'#A5F3FC',S:'#FEF08A',N:'#93C5FD',H:'#E5E7EB',Cu:'#F97316',Zn:'#A3E635',Ga:'#C4B5FD',As:'#6EE7B7',Bi:'#FB7185',Pb:'#94A3B8',Sn:'#FCD34D',Ge:'#6EE7B7',default:'#94A3B8'};
+  const EL_RADII={Na:1.02,Cl:0.99,O:0.73,Ti:0.86,Fe:0.78,Ba:1.35,Ca:1.14,K:1.33,Li:0.76,Mg:0.86,Al:0.68,Si:0.54,H:0.31,default:0.85};
+  const supercell=[];
+  for(let ix=0;ix<2;ix++)for(let iy=0;iy<2;iy++)for(let iz=0;iz<2;iz++)for(const a of atoms)supercell.push({element:a.element,x:(a.x+ix)-0.5,y:(a.y+iy)-0.5,z:(a.z+iz)-0.5});
+  const SF=2.4;const sc=supercell.map(a=>({...a,x:a.x*SF,y:a.y*SF,z:a.z*SF}));
+  const bonds=[];
+  for(let i=0;i<sc.length;i++)for(let j=i+1;j<sc.length;j++){const a=sc[i],b=sc[j];const d=Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2+(a.z-b.z)**2);const thresh=((EL_RADII[a.element]||0.85)+(EL_RADII[b.element]||0.85))*1.1;if(d<thresh)bonds.push([i,j])}
+  info.textContent=sc.length+' atoms · '+bonds.length+' bonds · 2×2×2 supercell · SG: '+(validation.detected_spacegroup||'?')+' · '+formula;
+  const W=canvas.offsetWidth||600,H=360;canvas.width=W;canvas.height=H;
   const ctx=canvas.getContext('2d');
-  let rotX=0.4,rotY=0.5,zoom=1.0,dragging=false,lastX=0,lastY=0;
-  let alive=true;
-  if(canvas._kill) canvas._kill();
-  canvas._kill=()=>{alive=false;};
-
-  canvas.onmousedown=e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;};
+  let rotX=0.4,rotY=0.5,zoom=1.0,dragging=false,lastX=0,lastY=0,alive=true;
+  if(canvas._kill)canvas._kill();canvas._kill=()=>{alive=false};
+  canvas.onmousedown=e=>{dragging=true;lastX=e.clientX;lastY=e.clientY};
   window.onmouseup=()=>dragging=false;
-  window.onmousemove=e=>{if(!dragging)return;rotY+=(e.clientX-lastX)*0.008;rotX+=(e.clientY-lastY)*0.008;lastX=e.clientX;lastY=e.clientY;};
-  canvas.onwheel=e=>{zoom*=e.deltaY>0?0.93:1.08;zoom=Math.max(0.2,Math.min(5,zoom));e.preventDefault();};
-
-  function proj(x,y,z){
-    const cy=Math.cos(rotY),sy=Math.sin(rotY);
-    const rx=x*cy+z*sy,rz=-x*sy+z*cy;
-    const cx=Math.cos(rotX),sx=Math.sin(rotX);
-    const ry=y*cx-rz*sx,rz2=y*sx+rz*cx;
-    const P=6/(6+rz2);
-    const S=Math.min(W,H)*0.3*zoom;
-    return {sx:W/2+rx*S*P,sy:H/2+ry*S*P,depth:rz2,P};
-  }
-
-  function sphere(sx,sy,r,col){
-    const g=ctx.createRadialGradient(sx-r*0.32,sy-r*0.35,r*0.02,sx,sy,r);
-    g.addColorStop(0,'rgba(255,255,255,0.95)');
-    g.addColorStop(0.18,col);
-    g.addColorStop(0.65,col+'bb');
-    g.addColorStop(1,col+'22');
-    ctx.beginPath();ctx.arc(sx,sy,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
-    ctx.strokeStyle=col+'44';ctx.lineWidth=0.7;ctx.stroke();
-  }
-
-  function frame(){
-    if(!alive)return;
-    ctx.fillStyle='#0E1117';ctx.fillRect(0,0,W,H);
-    if(!dragging)rotY+=0.004;
-
-    const pr=sc.map(a=>({...a,...proj(a.x,a.y,a.z)}));
-    const order=pr.map((_,i)=>i).sort((a,b)=>pr[a].depth-pr[b].depth);
-
-    // Bonds
-    for(const[i,j]of bonds){
-      const a=pr[i],b=pr[j];
-      if(a.P<0.05||b.P<0.05)continue;
-      const mx=(a.sx+b.sx)/2,my=(a.sy+b.sy)/2;
-      const lw=Math.max(1,2.8*Math.min(a.P,b.P)*zoom);
-      ctx.lineWidth=lw;
-      ctx.beginPath();ctx.moveTo(a.sx,a.sy);ctx.lineTo(mx,my);
-      ctx.strokeStyle=(EL_COLORS[a.element]||EL_COLORS.default)+'88';ctx.stroke();
-      ctx.beginPath();ctx.moveTo(mx,my);ctx.lineTo(b.sx,b.sy);
-      ctx.strokeStyle=(EL_COLORS[b.element]||EL_COLORS.default)+'88';ctx.stroke();
-    }
-
-    // Atoms
-    for(const i of order){
-      const a=pr[i];
-      if(a.P<0.05)continue;
-      const col=EL_COLORS[a.element]||EL_COLORS.default;
-      const r=Math.max(4,(EL_RADII[a.element]||0.85)*20*a.P*zoom);
-      sphere(a.sx,a.sy,r,col);
-      if(r>9){
-        ctx.fillStyle='#fff';
-        ctx.font='bold '+Math.round(r*0.62)+'px DM Sans,sans-serif';
-        ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.fillText(a.element,a.sx,a.sy);
-      }
-    }
-
-    // Legend bottom left
-    const els=[...new Set(sc.map(a=>a.element))];
-    let lx=14;
-    ctx.font='11px DM Mono,monospace';
-    for(const el of els){
-      const c=EL_COLORS[el]||EL_COLORS.default;
-      ctx.beginPath();ctx.arc(lx+6,H-14,6,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();
-      ctx.fillStyle='#7A8899';ctx.textAlign='left';ctx.textBaseline='middle';
-      ctx.fillText(el,lx+16,H-14);
-      lx+=ctx.measureText(el).width+30;
-    }
-
-    requestAnimationFrame(frame);
-  }
+  window.onmousemove=e=>{if(!dragging)return;rotY+=(e.clientX-lastX)*0.008;rotX+=(e.clientY-lastY)*0.008;lastX=e.clientX;lastY=e.clientY};
+  canvas.onwheel=e=>{zoom*=e.deltaY>0?0.93:1.08;zoom=Math.max(0.2,Math.min(5,zoom));e.preventDefault()};
+  canvas.ontouchstart=e=>{dragging=true;lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;e.preventDefault()};
+  canvas.ontouchend=()=>dragging=false;
+  canvas.ontouchmove=e=>{if(!dragging)return;rotY+=(e.touches[0].clientX-lastX)*0.008;rotX+=(e.touches[0].clientY-lastY)*0.008;lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;e.preventDefault()};
+  function proj(x,y,z){const cy=Math.cos(rotY),sy=Math.sin(rotY);const rx=x*cy+z*sy,rz=-x*sy+z*cy;const cx=Math.cos(rotX),sx=Math.sin(rotX);const ry=y*cx-rz*sx,rz2=y*sx+rz*cx;const P=6/(6+rz2);const S=Math.min(W,H)*0.32*zoom;return{sx:W/2+rx*S*P,sy:H/2+ry*S*P,depth:rz2,P}}
+  function sphere(sx,sy,r,col){const g=ctx.createRadialGradient(sx-r*0.3,sy-r*0.35,r*0.02,sx,sy,r);g.addColorStop(0,'rgba(255,255,255,0.95)');g.addColorStop(0.18,col);g.addColorStop(0.65,col+'bb');g.addColorStop(1,col+'22');ctx.beginPath();ctx.arc(sx,sy,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();ctx.strokeStyle=col+'55';ctx.lineWidth=0.8;ctx.stroke()}
+  function frame(){if(!alive)return;ctx.fillStyle='#EEF2FA';ctx.fillRect(0,0,W,H);if(!dragging)rotY+=0.003;const pr=sc.map(a=>({...a,...proj(a.x,a.y,a.z)}));const order=pr.map((_,i)=>i).sort((a,b)=>pr[a].depth-pr[b].depth);for(const[i,j]of bonds){const a=pr[i],b=pr[j];if(a.P<0.05||b.P<0.05)continue;const mx=(a.sx+b.sx)/2,my=(a.sy+b.sy)/2;const lw=Math.max(1,2.5*Math.min(a.P,b.P)*zoom);ctx.lineWidth=lw;ctx.beginPath();ctx.moveTo(a.sx,a.sy);ctx.lineTo(mx,my);ctx.strokeStyle=(EL_COLORS[a.element]||EL_COLORS.default)+'99';ctx.stroke();ctx.beginPath();ctx.moveTo(mx,my);ctx.lineTo(b.sx,b.sy);ctx.strokeStyle=(EL_COLORS[b.element]||EL_COLORS.default)+'99';ctx.stroke()}for(const i of order){const a=pr[i];if(a.P<0.05)continue;const col=EL_COLORS[a.element]||EL_COLORS.default;const r=Math.max(4,(EL_RADII[a.element]||0.85)*20*a.P*zoom);sphere(a.sx,a.sy,r,col);if(r>9){ctx.fillStyle='#1F2937';ctx.font='bold '+Math.round(r*0.58)+'px IBM Plex Sans,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(a.element,a.sx,a.sy)}}const els=[...new Set(sc.map(a=>a.element))];let lx=14;ctx.font='11px IBM Plex Mono,monospace';for(const el of els){const c=EL_COLORS[el]||EL_COLORS.default;ctx.beginPath();ctx.arc(lx+6,H-14,6,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();ctx.fillStyle='#6B7280';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(el,lx+16,H-14);lx+=ctx.measureText(el).width+30}requestAnimationFrame(frame)}
   frame();
 }
 
-function parseCIFAtoms(cif){
-  const atoms=[];
-  const lines=cif.split('\n');
-  let xIdx=-1,yIdx=-1,zIdx=-1,elIdx=-1,labelIdx=-1,headers=[],inAtom=false;
-  for(let i=0;i<lines.length;i++){
-    const l=lines[i].trim();
-    if(l==='loop_'){headers=[];xIdx=-1;yIdx=-1;zIdx=-1;elIdx=-1;labelIdx=-1;inAtom=false;continue;}
-    if(l.startsWith('_atom_site_')){
-      headers.push(l);inAtom=true;
-      if(l==='_atom_site_fract_x')xIdx=headers.length-1;
-      if(l==='_atom_site_fract_y')yIdx=headers.length-1;
-      if(l==='_atom_site_fract_z')zIdx=headers.length-1;
-      if(l==='_atom_site_type_symbol')elIdx=headers.length-1;
-      if(l==='_atom_site_label')labelIdx=headers.length-1;
-      continue;
-    }
-    if(inAtom&&xIdx>=0&&l.length>0&&!l.startsWith('_')&&!l.startsWith('loop_')&&!l.startsWith('data_')){
-      const p=l.split(/\s+/);
-      if(p.length>Math.max(xIdx,yIdx,zIdx)){
-        let el=elIdx>=0?p[elIdx]:(labelIdx>=0?p[labelIdx].replace(/[0-9+\-]/g,''):'X');
-        el=el.charAt(0).toUpperCase()+el.slice(1).toLowerCase();
-        const x=parseFloat(p[xIdx]),y=parseFloat(p[yIdx]),z=parseFloat(p[zIdx]);
-        if(!isNaN(x)&&!isNaN(y)&&!isNaN(z))atoms.push({element:el,x,y,z});
-      }
-    }
-    if(inAtom&&xIdx>=0&&(l.startsWith('loop_')||l.startsWith('_cell')||l.startsWith('_symmetry')||l.startsWith('data_')))inAtom=false;
+function parseCIFAtoms(cif){const atoms=[];const lines=cif.split('\n');let xIdx=-1,yIdx=-1,zIdx=-1,elIdx=-1,labelIdx=-1,headers=[],inAtom=false;for(let i=0;i<lines.length;i++){const l=lines[i].trim();if(l==='loop_'){headers=[];xIdx=-1;yIdx=-1;zIdx=-1;elIdx=-1;labelIdx=-1;inAtom=false;continue}if(l.startsWith('_atom_site_')){headers.push(l);inAtom=true;if(l==='_atom_site_fract_x')xIdx=headers.length-1;if(l==='_atom_site_fract_y')yIdx=headers.length-1;if(l==='_atom_site_fract_z')zIdx=headers.length-1;if(l==='_atom_site_type_symbol')elIdx=headers.length-1;if(l==='_atom_site_label')labelIdx=headers.length-1;continue}if(inAtom&&xIdx>=0&&l.length>0&&!l.startsWith('_')&&!l.startsWith('loop_')&&!l.startsWith('data_')){const p=l.split(/\s+/);if(p.length>Math.max(xIdx,yIdx,zIdx)){let el=elIdx>=0?p[elIdx]:(labelIdx>=0?p[labelIdx].replace(/[0-9+\-]/g,''):'X');el=el.charAt(0).toUpperCase()+el.slice(1).toLowerCase();const x=parseFloat(p[xIdx]),y=parseFloat(p[yIdx]),z=parseFloat(p[zIdx]);if(!isNaN(x)&&!isNaN(y)&&!isNaN(z))atoms.push({element:el,x,y,z})}}if(inAtom&&xIdx>=0&&(l.startsWith('loop_')||l.startsWith('_cell')||l.startsWith('_symmetry')||l.startsWith('data_')))inAtom=false}return atoms}
+
+function copyCIF(){navigator.clipboard.writeText(document.getElementById('cifOut').textContent).then(()=>{const btns=document.querySelectorAll('.cif-btn');btns.forEach(b=>{if(b.textContent.includes('Copy')){b.textContent='Copied!';setTimeout(()=>b.textContent='Copy to Clipboard',1500)}})})}
+function dlCIF(){const blob=new Blob([document.getElementById('cifOut').textContent],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=curF+'.cif';a.click()}
+
+// CRYSTAL SHAPES ANIMATION
+window.addEventListener('load', function(){
+  const canvas = document.getElementById('crystalShapes');
+  if(!canvas) return;
+  const CW = canvas.parentElement.offsetWidth || 300;
+  const CH = 160;
+  canvas.width = CW;
+  canvas.height = CH;
+  const ctx = canvas.getContext('2d');
+
+  const W = CW;
+  const H = CH;
+  let t = 0;
+
+  // Colors matching our navy theme
+  const C1 = '#60A5FA'; // blue - cubic
+  const C2 = '#818CF8'; // indigo - octahedral
+  const C3 = '#34D399'; // teal - tetrahedral
+
+  function project(x, y, z, cx, cy, rotY, rotX, scale){
+    const cy_ = Math.cos(rotY), sy_ = Math.sin(rotY);
+    const rx = x*cy_ + z*sy_, rz = -x*sy_ + z*cy_;
+    const cx_ = Math.cos(rotX), sx_ = Math.sin(rotX);
+    const ry = y*cx_ - rz*sx_, rz2 = y*sx_ + rz*cx_;
+    const P = 4/(4+rz2);
+    return { x: cx + rx*scale*P, y: cy + ry*scale*P, z: rz2, P };
   }
-  return atoms;
+
+  function drawEdge(p1, p2, color, alpha){
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.strokeStyle = color + Math.round(alpha*255).toString(16).padStart(2,'0');
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+  }
+
+  function drawVertex(p, color, r){
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, r, 0, Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  // CUBE vertices
+  const cubeV = [
+    [-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],
+    [-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]
+  ];
+  const cubeE = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+
+  // OCTAHEDRON vertices
+  const octV = [[0,1.4,0],[0,-1.4,0],[1.4,0,0],[-1.4,0,0],[0,0,1.4],[0,0,-1.4]];
+  const octE = [[0,2],[0,3],[0,4],[0,5],[1,2],[1,3],[1,4],[1,5],[2,4],[4,3],[3,5],[5,2]];
+
+  // TETRAHEDRON vertices
+  const s = 1.3;
+  const tetV = [[s,s,s],[s,-s,-s],[-s,s,-s],[-s,-s,s]];
+  const tetE = [[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
+
+  function drawShape(verts, edges, cx, cy, rotY, rotX, scale, color){
+    const pts = verts.map(([x,y,z]) => project(x,y,z,cx,cy,rotY,rotX,scale));
+    // draw edges
+    for(const [a,b] of edges){
+      const depth = (pts[a].z + pts[b].z) / 2;
+      const alpha = 0.35 + Math.max(0, Math.min(0.55, (depth+2)/4));
+      drawEdge(pts[a], pts[b], color, alpha);
+    }
+    // draw vertices
+    for(const p of pts){
+      const r = Math.max(2, 3 * p.P);
+      drawVertex(p, color, r);
+    }
+  }
+
+  function frame(){
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(28,43,74,0)';
+    ctx.fillRect(0, 0, W, H);
+
+    const spacing = W / 4;
+    const cy = H / 2;
+
+    drawShape(cubeV, cubeE, spacing * 0.9, cy, t * 0.6, t * 0.4, 28, C1);
+    drawShape(octV, octE, spacing * 2, cy, t * 0.5 + 1, t * 0.35, 30, C2);
+    drawShape(tetV, tetE, spacing * 3.1, cy, t * 0.7 + 2, t * 0.45, 28, C3);
+
+    t += 0.004;
+    requestAnimationFrame(frame);
+  }
+  frame();
+});
+</script>
+
+<!-- MATERIALS SCIENCE CHATBOT WIDGET -->
+<style>
+/* Chatbot styles */
+.chat-bubble{
+  position:fixed;bottom:2rem;right:2rem;z-index:1000;
+  width:52px;height:52px;border-radius:50%;
+  background:var(--blue);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(20,86,203,0.35);
+  transition:transform .2s,background .15s;
+}
+.chat-bubble:hover{background:var(--blue2);transform:scale(1.08)}
+.chat-bubble svg{width:24px;height:24px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.chat-window{
+  position:fixed;bottom:5.5rem;right:2rem;z-index:1000;
+  width:360px;height:500px;
+  background:var(--white);border:1px solid var(--border);border-radius:12px;
+  box-shadow:0 8px 32px rgba(20,86,203,0.15);
+  display:none;flex-direction:column;overflow:hidden;
+}
+.chat-window.open{display:flex}
+
+.chat-head{
+  background:var(--navy);padding:1rem 1.25rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.chat-head-left{display:flex;align-items:center;gap:10px}
+.chat-head-icon{width:32px;height:32px;background:rgba(255,255,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.chat-head-icon svg{width:17px;height:17px;stroke:#7DD3FC;fill:none;stroke-width:2;stroke-linecap:round}
+.chat-head-title{font-size:0.88rem;font-weight:600;color:white;font-family:'IBM Plex Sans',sans-serif}
+.chat-head-sub{font-size:0.65rem;color:#93B4D4;font-family:'IBM Plex Mono',monospace;margin-top:1px}
+.chat-close{background:none;border:none;color:#93B4D4;cursor:pointer;font-size:1.2rem;line-height:1;padding:2px 6px;border-radius:4px;transition:color .15s}
+.chat-close:hover{color:white}
+
+.chat-msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.75rem}
+.chat-msgs::-webkit-scrollbar{width:4px}
+.chat-msgs::-webkit-scrollbar-track{background:transparent}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+.msg{max-width:88%;font-size:0.84rem;line-height:1.7;padding:0.8rem 1rem;border-radius:12px;font-family:'IBM Plex Sans',sans-serif}
+.msg.bot{background:var(--bg);border:1px solid var(--border);color:var(--text2);align-self:flex-start;border-bottom-left-radius:3px}
+.msg.user{background:var(--blue);color:white;align-self:flex-end;border-bottom-right-radius:3px}
+.msg.typing{color:var(--text4);font-style:italic}
+
+.chat-suggestions{padding:0 1rem 0.75rem;display:flex;flex-wrap:wrap;gap:0.35rem}
+.suggestion{font-size:0.68rem;padding:4px 10px;border-radius:20px;border:1px solid var(--blue-mid);color:var(--blue);cursor:pointer;font-family:'IBM Plex Mono',monospace;background:var(--blue-light);transition:all .15s;white-space:nowrap}
+.suggestion:hover{background:var(--blue);color:white}
+
+.chat-input-wrap{padding:0.75rem;border-top:1px solid var(--border);display:flex;gap:0.5rem}
+.chat-input{
+  flex:1;padding:0.55rem 0.85rem;border:1px solid var(--border2);border-radius:20px;
+  font-size:0.82rem;font-family:'IBM Plex Sans',sans-serif;color:var(--text);
+  outline:none;transition:border-color .15s;
+}
+.chat-input:focus{border-color:var(--blue)}
+.chat-send{
+  width:34px;height:34px;border-radius:50%;background:var(--blue);border:none;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .15s;flex-shrink:0;
+}
+.chat-send:hover{background:var(--blue2)}
+.chat-send:disabled{opacity:0.4;cursor:not-allowed}
+.chat-send svg{width:15px;height:15px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+</style>
+
+<!-- Chat bubble button -->
+<button class="chat-bubble" onclick="toggleChat()" title="Materials Science Assistant">
+  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M12 2a10 10 0 0 1 0 20A10 10 0 0 1 12 2"/>
+    <path d="M2 12h4M18 12h4M12 2v4M12 18v4"/>
+    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(45 12 12)"/>
+  </svg>
+</button>
+
+<!-- Chat window -->
+<div class="chat-window" id="chatWindow">
+  <div class="chat-head">
+    <div class="chat-head-left">
+      <div class="chat-head-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div>
+        <div class="chat-head-title">Materials Assistant</div>
+        <div class="chat-head-sub">Specialized in crystal structures</div>
+      </div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+
+  <div class="chat-msgs" id="chatMsgs">
+    <div class="msg bot">Hi! I'm your materials science assistant. Ask me anything about crystal structures, space groups, CIF files, or materials in general!</div>
+  </div>
+
+  <div class="chat-suggestions" id="suggestions">
+    <span class="suggestion" onclick="askSuggestion(this)">What is NaCl?</span>
+    <span class="suggestion" onclick="askSuggestion(this)">What is a space group?</span>
+    <span class="suggestion" onclick="askSuggestion(this)">What is a CIF file?</span>
+    <span class="suggestion" onclick="askSuggestion(this)">What is QLoRA?</span>
+  </div>
+
+  <div class="chat-input-wrap">
+    <input class="chat-input" id="chatInput" type="text" placeholder="Ask about materials science..." onkeydown="if(event.key==='Enter')sendChat()"/>
+    <button class="chat-send" id="chatSend" onclick="sendChat()">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+// REPLACE THIS WITH YOUR GEMINI API KEY (starts with AIza...)
+const CLAUDE_API_KEY = 'gemini_api_key_here';
+
+const SYSTEM_PROMPT = `You are a specialized materials science assistant embedded in CrysText, an AI tool for crystal structure generation. You ONLY answer questions related to:
+- Crystal structures, crystallography, and CIF files
+- Space groups and symmetry
+- Materials science concepts (band gaps, lattice parameters, unit cells, etc.)
+- The MP-20 dataset and Materials Project
+- Common materials like NaCl, GaAs, BaTiO3, TiO2, Fe2O3, MgO
+- QLoRA, fine-tuning, and how CrysText works
+- DFT (Density Functional Theory) basics
+- Indian materials science applications and research
+
+If asked anything outside materials science, politely say: "I'm specialized in materials science only. Please ask me about crystal structures, space groups, or materials!"
+
+Keep answers clear, concise, and friendly. Use simple language for non-experts.`;
+
+let chatHistory = [];
+let chatOpen = false;
+
+function toggleChat(){
+  chatOpen = !chatOpen;
+  document.getElementById('chatWindow').classList.toggle('open', chatOpen);
+  if(chatOpen) document.getElementById('chatInput').focus();
 }
 
-function copyCIF(){
-  navigator.clipboard.writeText(document.getElementById('cifOut').textContent).then(()=>{
-    const b=document.querySelector('.act.cp');b.textContent='Copied!';
-    setTimeout(()=>b.textContent='Copy',1500);
-  });
+function askSuggestion(el){
+  document.getElementById('chatInput').value = el.textContent;
+  document.getElementById('suggestions').style.display = 'none';
+  sendChat();
 }
-function dlCIF(){
-  const blob=new Blob([document.getElementById('cifOut').textContent],{type:'text/plain'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download=curF+'.cif';a.click();
-}</script>
+
+async function sendChat(){
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+
+  input.value = '';
+  document.getElementById('chatSend').disabled = true;
+  document.getElementById('suggestions').style.display = 'none';
+
+  addMsg(msg, 'user');
+  chatHistory.push({role:'user', content: msg});
+
+  const typingId = addMsg('Thinking...', 'bot typing');
+
+  try {
+    const res = await fetch('http://localhost:5000/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        messages: chatHistory,
+        api_key: CLAUDE_API_KEY
+      })
+    });
+
+    const data = await res.json();
+    const reply = data.reply || data.error || 'Sorry, could not get a response.';
+
+    removeMsg(typingId);
+    addMsg(reply, 'bot');
+    chatHistory.push({role:'assistant', content: reply});
+
+  } catch(e) {
+    removeMsg(typingId);
+    addMsg('Connection error. Please check your internet and try again.', 'bot');
+  }
+
+  document.getElementById('chatSend').disabled = false;
+  input.focus();
+}
+
+function addMsg(text, cls){
+  const msgs = document.getElementById('chatMsgs');
+  const id = 'msg_' + Date.now();
+  const div = document.createElement('div');
+  div.className = 'msg ' + cls;
+  div.id = id;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return id;
+}
+
+function removeMsg(id){
+  const el = document.getElementById(id);
+  if(el) el.remove();
+}
+</script>
 </body>
 </html>
