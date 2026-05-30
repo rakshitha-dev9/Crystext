@@ -15,7 +15,7 @@ Type a formula like `NaCl` and space group `225` → CrysText generates a comple
 - **Base:** Mistral-7B-v0.3
 - **Fine-tuning:** QLoRA (r=16, lora_alpha=16), 4-bit quantization
 - **Dataset:** MP-20 (27,136 experimentally verified crystal structures)
-- **Training:** Full 27k samples trained — Epoch 2 in progress
+- **Training:** Full 27k samples, supervised fine-tuning complete
 - **HuggingFace:** https://huggingface.co/Charanya-2026/crystext-mistral-27k
 
 ---
@@ -95,16 +95,18 @@ Crystext/
 ├── app.py                     ← Flask backend (port 5000)
 ├── index.html                 ← Main UI — input page (port 8080)
 ├── structure.html             ← Structure viewer page (opens in new tab)
-├── crystext_rewards.py        ← GRPO reward function (paper-aligned)
 ├── prompt_refinement.py       ← Auto-corrects user input typos
-├── llm_prompt_refiner.py      ← Optional LLM-based input refinement
-├── test_api.py                ← API endpoint smoke tests
 ├── requirements.txt           ← Python dependencies
 ├── README.md                  ← This file
 ├── HOW_TO_TRAIN.md            ← SFT training instructions
-├── HOW_TO_TRAIN_RL.md         ← GRPO/CrysText-RL training instructions
 └── training/
-    └── crystext_training.ipynb ← Kaggle training notebook
+    ├── crystext_training.ipynb      ← Kaggle SFT training notebook
+    ├── grpo_train.py                ← GRPO/CrysText-RL training script
+    ├── crystext_rewards.py          ← Paper-aligned reward function
+    ├── crystext_grpo_reward.py      ← TRL-compatible reward wrapper
+    ├── dataset_utils.py             ← GRPO dataset preparation
+    ├── prepare_grpo_dataset.py      ← Export MP-20 CSV to JSONL
+    └── __init__.py
 ```
 
 ---
@@ -122,7 +124,7 @@ Crystext/
 
 ---
 
-## New Features
+## Features
 
 ### Prompt Refinement
 Automatically fixes user input errors before generation:
@@ -138,12 +140,14 @@ Scores generated CIFs in 4 stages:
 3. Composition match — correct elements (+0.20)
 4. Structure match vs ground truth (+0.50)
 
+The full GRPO training pipeline (`training/grpo_train.py`) is implemented and ready to run. Training requires 24GB+ VRAM.
+
 ### Materials Science Chatbot
 Floating chat widget powered by Gemini API. Specialized in crystal structures, space groups, CIF files, and materials science. Add your Gemini API key in `index.html`.
 
 ### Structure Viewer Page
 Materials Project-inspired layout:
-- Large 3D ball-and-stick viewer (FCC lattice aware)
+- Large 3D ball-and-stick viewer (FCC/BCC lattice aware)
 - Cell parameters panel
 - Properties table
 - CIF file display (symmetry operations hidden by default)
@@ -162,6 +166,7 @@ Tests all endpoints — health, refine, generate, batch, reward.
 
 ## Known Limitations
 
-- Space group conditioning improves with more training (Epoch 2 in progress)
+- Works best for compounds present in MP-20
 - Generation takes ~60 seconds per structure
 - Requires CUDA GPU — CPU inference is very slow
+- GRPO training requires 24GB+ VRAM (pipeline implemented, not yet trained)
