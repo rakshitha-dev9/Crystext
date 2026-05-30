@@ -17,6 +17,9 @@ from peft import PeftModel
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'training'))
 from crystext_rewards import build_prompt, evaluate_reward, extract_cif
 from crystext_rewards import _parse_structure
 from prompt_refinement import refine_user_input
