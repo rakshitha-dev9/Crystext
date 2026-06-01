@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CrysText — Structure Viewer</title>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- NGL Viewer -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ngl/2.0.0-dev.37/ngl.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -70,9 +72,8 @@ nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem
 .cs-title{font-family:'Source Serif 4',serif;font-size:1rem;font-weight:600;color:var(--text)}
 .cs-body{padding:1.25rem}
 
-/* 3D VIEWER — transparent background like MP */
-#viewer-canvas{width:100%;height:520px;border-radius:8px;background:transparent;border:none;display:block;cursor:grab}
-#viewer-canvas:active{cursor:grabbing}
+/* NGL VIEWER */
+#viewer-canvas{width:100%;height:520px;border-radius:8px;background:#1a1f2e;border:none;display:block;position:relative;overflow:hidden}
 .viewer-footer{margin-top:0.6rem;display:flex;align-items:center;justify-content:space-between}
 .viewer-info{font-size:0.7rem;font-family:'IBM Plex Mono',monospace;color:var(--text4)}
 .viewer-hint{font-size:0.7rem;color:var(--text4);font-style:italic}
@@ -191,20 +192,21 @@ nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem
   </div>
 </div>
 
-<!-- PAGE LAYOUT — Materials Project style: viewer left, properties right -->
+<!-- PAGE LAYOUT -->
 <div class="page-layout">
 
-  <!-- LEFT: BIG 3D VIEWER -->
+  <!-- LEFT: NGL 3D VIEWER -->
   <div class="viewer-col">
-    <canvas id="viewer-canvas"></canvas>
+    <div id="viewer-canvas"></div>
     <div class="viewer-footer">
       <div class="viewer-info" id="viewerInfo">—</div>
-      <div class="viewer-hint">Drag to rotate · Scroll to zoom</div>
+      <div class="viewer-hint">Drag to rotate · Scroll to zoom · Right-drag to pan</div>
     </div>
     <div class="viewer-controls">
       <button class="vctrl active" id="btn-ballstick" onclick="setStyle('ballstick',this)">Ball & Stick</button>
       <button class="vctrl" id="btn-spacefill" onclick="setStyle('spacefill',this)">Space Fill</button>
       <button class="vctrl" id="btn-wireframe" onclick="setStyle('wireframe',this)">Wireframe</button>
+      <button class="vctrl" id="btn-unitcell" onclick="toggleUnitCell(this)">Unit Cell</button>
     </div>
 
     <!-- CIF FILE — below viewer on left -->
@@ -263,7 +265,7 @@ nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem
 </div>
 
 <script>
-// Get data from URL params
+// ─── State ───────────────────────────────────────────────────────────────────
 const params = new URLSearchParams(window.location.search);
 const formula = params.get('formula') || '';
 const sg = params.get('sg') || '';
@@ -275,14 +277,12 @@ let viewStyle = 'ballstick';
 let atomsData = [];
 let validationData = {};
 
-// Scroll to section
-function scrollTo(id){
-  document.getElementById(id).scrollIntoView({behavior:'smooth'});
-  document.querySelectorAll('.toc-item').forEach(t=>t.classList.remove('active'));
-  event.target.classList.add('active');
-}
+// NGL state
+let nglStage = null;
+let nglComponent = null;
+let unitCellVisible = true;
 
-// On load — check localStorage first, then fetch from Flask
+// ─── Load ─────────────────────────────────────────────────────────────────────
 window.addEventListener('load', async () => {
   if(!formula || !sg){
     showError('No formula or space group provided.', 'Go back and generate a structure first.');
@@ -292,7 +292,7 @@ window.addEventListener('load', async () => {
   document.getElementById('loadingSub').textContent = `Loading ${formula} SG ${sg}...`;
   document.getElementById('bcFormula').textContent = `${formula} · SG ${sg}`;
 
-  // Check localStorage first — instant load, no re-generation needed
+  // Check localStorage first
   const cached = localStorage.getItem('crystext_result');
   if(cached){
     try{
@@ -328,6 +328,7 @@ window.addEventListener('load', async () => {
   }
 });
 
+// ─── Error ────────────────────────────────────────────────────────────────────
 function showError(title, desc){
   document.getElementById('loadingOverlay').style.display = 'none';
   document.body.innerHTML += `
@@ -339,43 +340,31 @@ function showError(title, desc){
     </div>`;
 }
 
+// ─── CIF helpers ──────────────────────────────────────────────────────────────
 function buildShortCIF(cif){
   const lines = cif.split('\n');
   const result = [];
   let inSymmLoop = false;
-  let inAtomLoop = false;
 
   for(let i = 0; i < lines.length; i++){
     const l = lines[i].trim();
-
-    // Detect start of symmetry loop
     if(l === 'loop_'){
-      // Look ahead to see if next non-empty line is symmetry related
       let j = i + 1;
       while(j < lines.length && lines[j].trim() === '') j++;
       const nextLine = lines[j] ? lines[j].trim() : '';
       if(nextLine.startsWith('_symmetry_equiv')){
         inSymmLoop = true;
-        inAtomLoop = false;
-        continue; // skip the loop_ line too
-      } else if(nextLine.startsWith('_atom_site')){
-        inSymmLoop = false;
-        inAtomLoop = true;
+        continue;
       } else {
         inSymmLoop = false;
       }
     }
-
-    // Skip all symmetry loop content
     if(inSymmLoop){
-      if(l.startsWith('_atom_site') || l.startsWith('data_') || (l === 'loop_' && inSymmLoop)){
+      if(l.startsWith('_atom_site') || l.startsWith('data_') || l === 'loop_'){
         inSymmLoop = false;
         if(l === 'loop_') { result.push(lines[i]); continue; }
-      } else {
-        continue;
-      }
+      } else { continue; }
     }
-
     result.push(lines[i]);
   }
   return result.join('\n').trim();
@@ -395,11 +384,11 @@ function toggleCIF(){
   }
 }
 
+// ─── Render page ─────────────────────────────────────────────────────────────
 function renderPage(formula, sg, cif, val){
   const detFormula = val.detected_formula || formula;
   const detSG = val.detected_spacegroup || sg;
 
-  // Header
   document.title = `CrysText — ${detFormula}`;
   document.getElementById('hFormula').textContent = detFormula;
   document.getElementById('hSub').textContent = `Space Group: ${detSG} · Input: ${formula} SG ${sg} · Generated by CrysText`;
@@ -413,7 +402,6 @@ function renderPage(formula, sg, cif, val){
     ? '<span class="mat-badge valid">✓ Composition Match</span>'
     : '<span class="mat-badge warn">⚠ Composition Mismatch</span>';
 
-  // CIF display
   document.getElementById('cifOut').textContent = shortCIF || cif;
 
   // Cell parameters
@@ -421,19 +409,19 @@ function renderPage(formula, sg, cif, val){
   const cellB = cif.match(/_cell_length_b\s+([\d.]+)/);
   const cellC = cif.match(/_cell_length_c\s+([\d.]+)/);
   const alpha = cif.match(/_cell_angle_alpha\s+([\d.]+)/);
-  const beta = cif.match(/_cell_angle_beta\s+([\d.]+)/);
+  const beta  = cif.match(/_cell_angle_beta\s+([\d.]+)/);
   const gamma = cif.match(/_cell_angle_gamma\s+([\d.]+)/);
-  const vol = cif.match(/_cell_volume\s+([\d.]+)/);
+  const vol   = cif.match(/_cell_volume\s+([\d.]+)/);
 
   const cellParams = [
-    {l:'a',v:cellA?parseFloat(cellA[1]).toFixed(3):'—',u:'Å'},
-    {l:'b',v:cellB?parseFloat(cellB[1]).toFixed(3):'—',u:'Å'},
-    {l:'c',v:cellC?parseFloat(cellC[1]).toFixed(3):'—',u:'Å'},
-    {l:'α',v:alpha?parseFloat(alpha[1]).toFixed(2)+'°':'—',u:''},
-    {l:'β',v:beta?parseFloat(beta[1]).toFixed(2)+'°':'—',u:''},
-    {l:'γ',v:gamma?parseFloat(gamma[1]).toFixed(2)+'°':'—',u:''},
+    {l:'a', v:cellA?parseFloat(cellA[1]).toFixed(3):'—', u:'Å'},
+    {l:'b', v:cellB?parseFloat(cellB[1]).toFixed(3):'—', u:'Å'},
+    {l:'c', v:cellC?parseFloat(cellC[1]).toFixed(3):'—', u:'Å'},
+    {l:'α', v:alpha?parseFloat(alpha[1]).toFixed(2)+'°':'—', u:''},
+    {l:'β', v:beta ?parseFloat(beta[1]).toFixed(2)+'°':'—',  u:''},
+    {l:'γ', v:gamma?parseFloat(gamma[1]).toFixed(2)+'°':'—', u:''},
   ];
-  if(vol) cellParams.push({l:'Volume',v:parseFloat(vol[1]).toFixed(2),u:'Å³'});
+  if(vol) cellParams.push({l:'Volume', v:parseFloat(vol[1]).toFixed(2), u:'Å³'});
 
   document.getElementById('cellGrid').innerHTML = cellParams.map(p=>`
     <div class="cell-card">
@@ -443,9 +431,9 @@ function renderPage(formula, sg, cif, val){
   `).join('');
 
   // Properties table
-  const formulaSum = cif.match(/_chemical_formula_sum\s+'([^']+)'/);
+  const formulaSum    = cif.match(/_chemical_formula_sum\s+'([^']+)'/);
   const formulaStruct = cif.match(/_chemical_formula_structural\s+(\S+)/);
-  const Z = cif.match(/_cell_formula_units_Z\s+(\d+)/);
+  const Z      = cif.match(/_cell_formula_units_Z\s+(\d+)/);
   const sgName = cif.match(/_symmetry_space_group_name_H-M\s+(\S+)/);
 
   const props = [
@@ -462,213 +450,207 @@ function renderPage(formula, sg, cif, val){
     <tr><td>${k}</td><td class="prop-highlight">${v}</td></tr>
   `).join('');
 
-  // Build 3D viewer
+  // Build viewers
   atomsData = parseCIFAtoms(cif);
-  buildViewer();
+  buildNGLViewer(cif);
   buildIconCanvas();
 }
 
-// VIEWER STYLES
+// ─── NGL VIEWER ──────────────────────────────────────────────────────────────
+
+// Build an expanded CIF with 2x2x2 supercell manually
+// by duplicating atom positions before passing to NGL
+function buildExpandedCIF(cifText) {
+  const lines = cifText.split('\n');
+
+  // Extract cell parameters
+  const getVal = (key) => {
+    const m = cifText.match(new RegExp(key + '\\s+([\\d.]+)'));
+    return m ? parseFloat(m[1]) : null;
+  };
+  const a = getVal('_cell_length_a');
+  const b = getVal('_cell_length_b');
+  const c = getVal('_cell_length_c');
+  if(!a || !b || !c) return cifText; // can't expand, return original
+
+  // Parse atoms
+  const atoms = parseCIFAtoms(cifText);
+  if(!atoms.length) return cifText;
+
+  // Detect lattice translations from space group
+  const sgMatch = cifText.match(/_symmetry_space_group_name_H-M\s+'?([^'\n]+)'?/);
+  const sgName  = sgMatch ? sgMatch[1].trim() : '';
+  const sgNum   = validationData.detected_spacegroup || 0;
+
+  let latticeT = [[0,0,0]];
+  if(sgName.startsWith('F') || (sgNum>=196 && sgNum<=227))
+    latticeT = [[0,0,0],[0.5,0.5,0],[0.5,0,0.5],[0,0.5,0.5]];
+  else if(sgName.startsWith('I') || (sgNum>=197 && sgNum<=206))
+    latticeT = [[0,0,0],[0.5,0.5,0.5]];
+  else if(sgName.startsWith('R'))
+    latticeT = [[0,0,0],[2/3,1/3,1/3],[1/3,2/3,2/3]];
+  else if(sgName.startsWith('C'))
+    latticeT = [[0,0,0],[0.5,0.5,0]];
+  else if(sgName.startsWith('A'))
+    latticeT = [[0,0,0],[0,0.5,0.5]];
+
+  // Apply lattice translations
+  const conv = [];
+  for(const [tx,ty,tz] of latticeT){
+    for(const at of atoms){
+      const nx = ((at.x+tx) % 1 + 1) % 1;
+      const ny = ((at.y+ty) % 1 + 1) % 1;
+      const nz = ((at.z+tz) % 1 + 1) % 1;
+      // Check not duplicate
+      const dup = conv.some(b => Math.abs(nx-b.x)<0.01 && Math.abs(ny-b.y)<0.01 && Math.abs(nz-b.z)<0.01);
+      if(!dup) conv.push({element:at.element, x:nx, y:ny, z:nz});
+    }
+  }
+
+  // Add boundary copies (atoms at faces/edges/corners)
+  const tol = 0.01;
+  const withBoundary = [];
+  for(const at of conv){
+    const xs = [at.x]; const ys = [at.y]; const zs = [at.z];
+    if(at.x < tol) xs.push(1.0); if(at.y < tol) ys.push(1.0); if(at.z < tol) zs.push(1.0);
+    if(at.x > 1-tol) xs.push(0.0); if(at.y > 1-tol) ys.push(0.0); if(at.z > 1-tol) zs.push(0.0);
+    for(const x of xs) for(const y of ys) for(const z of zs)
+      withBoundary.push({element:at.element, x, y, z});
+  }
+
+  // Build new CIF with expanded cell (same a,b,c but P1 symmetry with all atoms explicit)
+  const sgLine   = cifText.match(/_symmetry_space_group_name_H-M\s+'?([^'\n]+)'?/);
+  const sgHM     = sgLine ? sgLine[0].split(/\s+/).slice(1).join(' ') : "'P 1'";
+  const sgNumLine = cifText.match(/_symmetry_Int_Tables_number\s+\d+/);
+  const sgNumVal  = sgNumLine ? sgNumLine[0] : '_symmetry_Int_Tables_number 1';
+  const vol = a * b * c; // approximate for cubic
+
+  let newCIF = `data_expanded\n`;
+  newCIF += `_cell_length_a   ${a}\n`;
+  newCIF += `_cell_length_b   ${b}\n`;
+  newCIF += `_cell_length_c   ${c}\n`;
+  const alpha = getVal('_cell_angle_alpha') || 90;
+  const beta  = getVal('_cell_angle_beta')  || 90;
+  const gamma = getVal('_cell_angle_gamma') || 90;
+  newCIF += `_cell_angle_alpha   ${alpha}\n`;
+  newCIF += `_cell_angle_beta    ${beta}\n`;
+  newCIF += `_cell_angle_gamma   ${gamma}\n`;
+  newCIF += `_symmetry_space_group_name_H-M   'P 1'\n`;
+  newCIF += `_symmetry_Int_Tables_number   1\n\n`;
+  newCIF += `loop_\n`;
+  newCIF += `_symmetry_equiv_pos_as_xyz\n`;
+  newCIF += `'x, y, z'\n\n`;
+  newCIF += `loop_\n`;
+  newCIF += `_atom_site_type_symbol\n`;
+  newCIF += `_atom_site_label\n`;
+  newCIF += `_atom_site_fract_x\n`;
+  newCIF += `_atom_site_fract_y\n`;
+  newCIF += `_atom_site_fract_z\n`;
+  withBoundary.forEach((at, i) => {
+    newCIF += `${at.element}  ${at.element}${i+1}  ${at.x.toFixed(6)}  ${at.y.toFixed(6)}  ${at.z.toFixed(6)}\n`;
+  });
+
+  return newCIF;
+}
+
+function buildNGLViewer(cifText){
+  const container = document.getElementById('viewer-canvas');
+  const info = document.getElementById('viewerInfo');
+
+  // Destroy previous stage if exists
+  if(nglStage){ nglStage.dispose(); nglStage = null; nglComponent = null; }
+
+  // Create NGL stage with dark background like Materials Project
+  nglStage = new NGL.Stage('viewer-canvas', {
+    backgroundColor: '#1a1f2e',
+    quality: 'high',
+    impostor: true,
+  });
+
+  // Handle window resize
+  window.addEventListener('resize', () => { if(nglStage) nglStage.handleResize(); });
+
+  // Build expanded CIF with all atoms explicit (conventional cell with boundary atoms)
+  const expandedCIF = buildExpandedCIF(cifText);
+
+  // Load expanded CIF as blob
+  const blob = new Blob([expandedCIF], { type: 'text/plain' });
+  const file = new File([blob], 'structure.cif');
+
+  nglStage.loadFile(file, {
+    ext: 'cif',
+    defaultRepresentation: false,
+  }).then(comp => {
+    nglComponent = comp;
+
+    // Apply the current view style
+    applyNGLStyle(viewStyle);
+
+    // Add unit cell box
+    comp.addRepresentation('unitcell', {
+      color: 'lightblue',
+      opacity: 0.6,
+      linewidth: 2,
+    });
+
+    // Center and zoom to fit
+    nglStage.autoView();
+
+    // Update info
+    const atomCount = comp.structure ? comp.structure.atomCount : atomsData.length;
+    info.textContent = `${atomCount} atoms · SG: ${validationData.detected_spacegroup || '?'} · NGL Viewer`;
+
+  }).catch(err => {
+    console.error('NGL load error:', err);
+    info.textContent = 'NGL viewer error — check console';
+    container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#93B4D4;font-family:IBM Plex Mono,monospace;font-size:0.85rem;">Structure viewer unavailable for this CIF</div>';
+  });
+}
+
+function applyNGLStyle(style){
+  if(!nglComponent) return;
+
+  // Remove all existing representations except unitcell
+  nglComponent.reprList.slice().forEach(repr => {
+    if(repr.type !== 'unitcell') nglComponent.removeRepresentation(repr);
+  });
+
+  if(style === 'ballstick'){
+    nglComponent.addRepresentation('ball+stick', {
+      multipleBond: true,
+      bondScale: 0.3,
+      sphereDetail: 2,
+    });
+  } else if(style === 'spacefill'){
+    nglComponent.addRepresentation('spacefill', {
+      radiusScale: 0.8,
+      sphereDetail: 2,
+    });
+  } else if(style === 'wireframe'){
+    nglComponent.addRepresentation('line', {
+      multipleBond: true,
+      linewidth: 2,
+    });
+  }
+}
+
 function setStyle(style, btn){
   viewStyle = style;
-  document.querySelectorAll('.vctrl').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.vctrl').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  buildViewer();
+  applyNGLStyle(style);
 }
 
-function buildViewer(){
-  const canvas = document.getElementById('viewer-canvas');
-  const info = document.getElementById('viewerInfo');
-  if(!atomsData || atomsData.length===0){info.textContent='Could not parse atom positions';return}
-
-  const EL_COLORS={Na:'#F97316',Cl:'#818CF8',Ti:'#60A5FA',O:'#F87171',Fe:'#A78BFA',Ba:'#34D399',Ca:'#FBBF24',K:'#F472B6',Li:'#67E8F9',Mg:'#86EFAC',Al:'#FCA5A5',Si:'#A5F3FC',S:'#FEF08A',N:'#93C5FD',H:'#E5E7EB',Cu:'#FB923C',Zn:'#A3E635',Ga:'#C4B5FD',As:'#6EE7B7',Bi:'#FB7185',Pb:'#94A3B8',Sn:'#FCD34D',Ge:'#6EE7B7',W:'#7DD3FC',Mn:'#F9A8D4',Co:'#86EFAC',Ni:'#FDE68A',default:'#94A3B8'};
-  const EL_RADII={Na:1.02,Cl:0.99,O:0.73,Ti:0.86,Fe:0.78,Ba:1.35,Ca:1.14,K:1.33,Li:0.76,Mg:0.86,Al:0.68,Si:0.54,H:0.31,Cu:0.87,W:0.88,Mn:0.81,Co:0.79,Ni:0.83,Ga:1.22,As:1.19,default:0.85};
-
-  // Detect lattice type from space group name in CIF
-  const sgMatch = fullCIF.match(/_symmetry_space_group_name_H-M\s+'?([^'\n]+)'?/);
-  const sgName = sgMatch ? sgMatch[1].trim() : '';
-  const sgNum = validationData.detected_spacegroup || 0;
-
-  // Lattice translations based on lattice type
-  let latticeTranslations = [[0,0,0]]; // primitive default
-  if(sgName.startsWith('F') || (sgNum>=196 && sgNum<=227)){
-    // FCC — 4 translations
-    latticeTranslations = [[0,0,0],[0.5,0.5,0],[0.5,0,0.5],[0,0.5,0.5]];
-  } else if(sgName.startsWith('I') || (sgNum>=197 && sgNum<=206)){
-    // BCC — 2 translations
-    latticeTranslations = [[0,0,0],[0.5,0.5,0.5]];
-  } else if(sgName.startsWith('A')){
-    latticeTranslations = [[0,0,0],[0,0.5,0.5]];
-  } else if(sgName.startsWith('B')){
-    latticeTranslations = [[0,0,0],[0.5,0,0.5]];
-  } else if(sgName.startsWith('C')){
-    latticeTranslations = [[0,0,0],[0.5,0.5,0]];
-  } else if(sgName.startsWith('R')){
-    latticeTranslations = [[0,0,0],[2/3,1/3,1/3],[1/3,2/3,2/3]];
-  }
-
-  // Apply lattice translations to get all atoms in conventional cell
-  const conventional = [];
-  for(const [tx,ty,tz] of latticeTranslations){
-    for(const a of atomsData){
-      const nx = (a.x + tx) % 1;
-      const ny = (a.y + ty) % 1;
-      const nz = (a.z + tz) % 1;
-      conventional.push({element:a.element, x:nx, y:ny, z:nz});
-    }
-  }
-
-  // Remove duplicates within tolerance
-  const unique = [];
-  for(const a of conventional){
-    const isDup = unique.some(b =>
-      Math.abs(a.x-b.x)<0.01 && Math.abs(a.y-b.y)<0.01 && Math.abs(a.z-b.z)<0.01
-    );
-    if(!isDup) unique.push(a);
-  }
-
-  // Add boundary atoms like VESTA — atoms on faces, edges, corners
-  // appear multiple times for visual completeness
-  const withBoundary = [];
-  const tolerance = 0.01;
-  for(const a of unique){
-    // Generate all boundary copies
-    const xs = [a.x];
-    const ys = [a.y];
-    const zs = [a.z];
-    if(a.x < tolerance) xs.push(1.0);
-    if(a.y < tolerance) ys.push(1.0);
-    if(a.z < tolerance) zs.push(1.0);
-    if(a.x > 1-tolerance) xs.push(0.0);
-    if(a.y > 1-tolerance) ys.push(0.0);
-    if(a.z > 1-tolerance) zs.push(0.0);
-    for(const x of xs) for(const y of ys) for(const z of zs)
-      withBoundary.push({element:a.element, x, y, z});
-  }
-
-  // Build 1x1x1 conventional cell only for cleaner visualization
-  const supercell=[];
-  for(const a of withBoundary)
-    supercell.push({element:a.element,x:a.x-0.5,y:a.y-0.5,z:a.z-0.5});
-
-  const SF=4.5;const sc=supercell.map(a=>({...a,x:a.x*SF,y:a.y*SF,z:a.z*SF}));
-
-  const bonds=[];
-  // Bonds disabled by default — like VESTA's default view
-  // Only draw bonds in wireframe mode
-  if(viewStyle==='wireframe'){
-    for(let i=0;i<sc.length;i++)for(let j=i+1;j<sc.length;j++){
-      const a=sc[i],b=sc[j];
-      const d=Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2+(a.z-b.z)**2);
-      const thresh=((EL_RADII[a.element]||0.85)+(EL_RADII[b.element]||0.85))*SF*0.75;
-      if(d<thresh)bonds.push([i,j]);
-    }
-  }
-
-  info.textContent=withBoundary.length+' atoms · '+bonds.length+' bonds · SG: '+(validationData.detected_spacegroup||'?');
-
-  const W=canvas.offsetWidth||800,H=480;canvas.width=W;canvas.height=H;
-  const ctx=canvas.getContext('2d');
-  let rotX=0.3,rotY=0.4,zoom=1.0,dragging=false,lastX=0,lastY=0,alive=true;
-  if(canvas._kill)canvas._kill();canvas._kill=()=>{alive=false};
-
-  canvas.onmousedown=e=>{dragging=true;lastX=e.clientX;lastY=e.clientY};
-  window.onmouseup=()=>dragging=false;
-  window.onmousemove=e=>{if(!dragging)return;rotY+=(e.clientX-lastX)*0.007;rotX+=(e.clientY-lastY)*0.007;lastX=e.clientX;lastY=e.clientY};
-  canvas.onwheel=e=>{zoom*=e.deltaY>0?0.93:1.08;zoom=Math.max(0.3,Math.min(4,zoom));e.preventDefault()};
-  canvas.ontouchstart=e=>{dragging=true;lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;e.preventDefault()};
-  canvas.ontouchend=()=>dragging=false;
-  canvas.ontouchmove=e=>{if(!dragging)return;rotY+=(e.touches[0].clientX-lastX)*0.007;rotX+=(e.touches[0].clientY-lastY)*0.007;lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;e.preventDefault()};
-
-  function proj(x,y,z){const cy=Math.cos(rotY),sy=Math.sin(rotY);const rx=x*cy+z*sy,rz=-x*sy+z*cy;const cx=Math.cos(rotX),sx=Math.sin(rotX);const ry=y*cx-rz*sx,rz2=y*sx+rz*cx;const P=5/(5+rz2);const S=Math.min(W,H)*0.36*zoom;return{sx:W/2+rx*S*P,sy:H/2+ry*S*P,depth:rz2,P}}
-
-  function sphere(sx,sy,r,col){
-    // Outer sphere
-    const g=ctx.createRadialGradient(sx-r*0.35,sy-r*0.4,r*0.05,sx,sy,r);
-    g.addColorStop(0,'rgba(255,255,255,0.98)');
-    g.addColorStop(0.12,col+'ff');
-    g.addColorStop(0.5,col+'ee');
-    g.addColorStop(0.85,col+'99');
-    g.addColorStop(1,col+'11');
-    ctx.beginPath();ctx.arc(sx,sy,r,0,Math.PI*2);
-    ctx.fillStyle=g;ctx.fill();
-    // Rim
-    ctx.strokeStyle=col+'66';ctx.lineWidth=Math.max(0.5,r*0.05);ctx.stroke();
-  }
-
-  function frame(){
-    if(!alive)return;
-    ctx.fillStyle='#F8FAFB';ctx.fillRect(0,0,W,H);
-    // NO auto rotation — stays still like VESTA until user drags
-    const pr=sc.map(a=>({...a,...proj(a.x,a.y,a.z)}));
-    const order=pr.map((_,i)=>i).sort((a,b)=>pr[a].depth-pr[b].depth);
-
-    if(viewStyle!=='spacefill'){
-      for(const[i,j]of bonds){
-        const a=pr[i],b=pr[j];if(a.P<0.05||b.P<0.05)continue;
-        const mx=(a.sx+b.sx)/2,my=(a.sy+b.sy)/2;
-        const lw=Math.max(1.5,3.5*Math.min(a.P,b.P)*zoom);
-        if(viewStyle==='wireframe'){
-          ctx.lineWidth=lw*0.6;ctx.beginPath();ctx.moveTo(a.sx,a.sy);ctx.lineTo(b.sx,b.sy);
-          ctx.strokeStyle='#94A3B8';ctx.stroke();
-        } else {
-          ctx.lineWidth=lw;
-          ctx.beginPath();ctx.moveTo(a.sx,a.sy);ctx.lineTo(mx,my);
-          ctx.strokeStyle=(EL_COLORS[a.element]||EL_COLORS.default)+'bb';ctx.stroke();
-          ctx.beginPath();ctx.moveTo(mx,my);ctx.lineTo(b.sx,b.sy);
-          ctx.strokeStyle=(EL_COLORS[b.element]||EL_COLORS.default)+'bb';ctx.stroke();
-        }
-      }
-    }
-
-    if(viewStyle!=='wireframe'){
-      for(const i of order){
-        const a=pr[i];if(a.P<0.05)continue;
-        const col=EL_COLORS[a.element]||EL_COLORS.default;
-        const baseR=(EL_RADII[a.element]||0.85);
-        const r=viewStyle==='spacefill'
-          ? Math.max(10,baseR*55*a.P*zoom)
-          : Math.max(8,baseR*38*a.P*zoom);
-        sphere(a.sx,a.sy,r,col);
-        if(r>10){
-          ctx.fillStyle='rgba(0,0,0,0.7)';
-          ctx.font='bold '+Math.round(r*0.55)+'px IBM Plex Sans,sans-serif';
-          ctx.textAlign='center';ctx.textBaseline='middle';
-          ctx.fillText(a.element,a.sx,a.sy);
-        }
-      }
-    }
-
-    // Draw unit cell box — like VESTA
-    const boxSize = SF * 0.5;
-    const boxCorners = [
-      [-boxSize,-boxSize,-boxSize],[boxSize,-boxSize,-boxSize],
-      [boxSize,boxSize,-boxSize],[-boxSize,boxSize,-boxSize],
-      [-boxSize,-boxSize,boxSize],[boxSize,-boxSize,boxSize],
-      [boxSize,boxSize,boxSize],[-boxSize,boxSize,boxSize]
-    ].map(([x,y,z])=>proj(x,y,z));
-    const boxEdges=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
-    ctx.strokeStyle='rgba(100,130,180,0.4)';ctx.lineWidth=0.8;
-    for(const[a,b]of boxEdges){
-      ctx.beginPath();ctx.moveTo(boxCorners[a].sx,boxCorners[a].sy);
-      ctx.lineTo(boxCorners[b].sx,boxCorners[b].sy);ctx.stroke();
-    }
-    const els=[...new Set(sc.map(a=>a.element))];
-    let lx=14;
-    ctx.font='11px IBM Plex Mono,monospace';
-    for(const el of els){
-      const c=EL_COLORS[el]||EL_COLORS.default;
-      ctx.beginPath();ctx.arc(lx+6,H-14,6,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();
-      ctx.fillStyle='#6B7280';ctx.textAlign='left';ctx.textBaseline='middle';
-      ctx.fillText(el,lx+16,H-14);
-      lx+=ctx.measureText(el).width+30;
-    }
-
-    requestAnimationFrame(frame);
-  }
-  frame();
+function toggleUnitCell(btn){
+  if(!nglComponent) return;
+  unitCellVisible = !unitCellVisible;
+  nglComponent.reprList.forEach(repr => {
+    if(repr.type === 'unitcell') repr.setVisibility(unitCellVisible);
+  });
+  btn.classList.toggle('active', unitCellVisible);
 }
 
+// ─── Icon canvas (header thumbnail) ─────────────────────────────────────────
 function buildIconCanvas(){
   const c = document.getElementById('iconCanvas');
   const ctx = c.getContext('2d');
@@ -689,6 +671,7 @@ function buildIconCanvas(){
   });
 }
 
+// ─── CIF atom parser (for icon canvas only) ──────────────────────────────────
 function parseCIFAtoms(cif){
   const atoms=[];const lines=cif.split('\n');
   let xIdx=-1,yIdx=-1,zIdx=-1,elIdx=-1,labelIdx=-1,headers=[],inAtom=false;
@@ -718,6 +701,7 @@ function parseCIFAtoms(cif){
   return atoms;
 }
 
+// ─── Copy / Download CIF ─────────────────────────────────────────────────────
 function copyCIF(){
   navigator.clipboard.writeText(fullCIF).then(()=>{
     const btns=document.querySelectorAll('.cif-btn,.hdr-btn');
