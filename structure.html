@@ -10,113 +10,196 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
+  --blue:#4C8BF5;--blue2:#6BA3FF;--blue-light:rgba(76,139,245,0.12);--blue-mid:rgba(76,139,245,0.25);
+  --text:#E8EDF5;--text2:#C8D5E8;--text3:#8FA3BE;--text4:#5A7290;
+  --bg:#131929;--bg2:#1A2235;--bg3:#212D42;
+  --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.16);
+  --green:#10B981;--green-light:rgba(16,185,129,0.12);
+  --red:#EF4444;--red-light:rgba(239,68,68,0.12);
+  --amber:#F59E0B;--amber-light:rgba(245,158,11,0.12);
+  --navy:#131929;
+  --glow:rgba(76,139,245,0.15);
+  --section-title:#FFFFFF;
+}
+
+/* LIGHT MODE */
+body.light{
   --blue:#1456CB;--blue2:#1a6fe8;--blue-light:#EBF2FF;--blue-mid:#C7DCFF;
   --text:#1a1a2e;--text2:#374151;--text3:#6B7280;--text4:#9CA3AF;
-  --bg:#F3F6FB;--white:#FFFFFF;
+  --bg:#EDF1F7;--bg2:#FFFFFF;--bg3:#F3F6FB;
   --border:#DDE3EE;--border2:#C8D1E0;
-  --green:#057A55;--green-light:#ECFDF5;
-  --red:#C81E1E;--red-light:#FEF2F2;
-  --amber:#B45309;--amber-light:#FFFBEB;
-  --navy:#1C2B4A;
+  --section-title:#1a1a2e;
 }
+body.light nav{background:rgba(255,255,255,0.97);border-bottom:1px solid #DDE3EE}
+body.light .breadcrumb{background:#F3F6FB;border-bottom:1px solid #DDE3EE;color:#9CA3AF}
+body.light .atom-legend{background:rgba(255,255,255,0.95);border:1px solid #C8D1E0}
+body.light .legend-name{color:#1a1a2e}
+body.light .legend-fullname{color:#9CA3AF}
+body.light .legend-item{color:#374151}
+body.light .loading-overlay{background:rgba(237,241,247,0.97)}
+body.light .panel-section{background:#FFFFFF;border:1px solid #DDE3EE;box-shadow:0 1px 3px rgba(20,86,203,0.04)}
+body.light .panel-section-title{color:#1456CB !important;font-family:'IBM Plex Mono',monospace !important;font-size:0.68rem !important;text-transform:uppercase;letter-spacing:0.1em;font-weight:600 !important}
+body.light .cell-card{background:#F3F6FB;border:1px solid #DDE3EE;box-shadow:0 1px 3px rgba(20,86,203,0.04)}
+body.light .cell-label{color:#1456CB !important;font-size:0.68rem !important;text-transform:uppercase;letter-spacing:0.08em;font-weight:600 !important}
+body.light .cell-val{color:#1a1a2e !important}
+body.light .cell-unit{color:#9CA3AF}
+body.light .prop-table tr{border-bottom:1px solid #DDE3EE}
+body.light .prop-table td:first-child{color:#6B7280}
+body.light .prop-table td:last-child{color:#1456CB;font-weight:600}
+body.light .vctrl{background:#FFFFFF;color:#6B7280;border-color:#C8D1E0}
+body.light .vctrl.active{background:#1456CB;color:white;border-color:#1456CB;box-shadow:none}
+body.light .vctrl:hover{border-color:#1456CB;color:#1456CB}
+body.light .compound-info-section{background:#FFFFFF;border:1px solid #DDE3EE;box-shadow:0 1px 3px rgba(20,86,203,0.04)}
+body.light .compound-info-header{color:#1456CB !important}
+body.light .compound-btn{background:#F3F6FB;color:#374151;border-color:#C8D1E0}
+body.light .compound-btn:hover{background:#EBF2FF;color:#1456CB;border-color:#1456CB}
+body.light .compound-btn.active{background:#1456CB;color:white;border-color:#1456CB;box-shadow:none}
+body.light .compound-answer{background:#F3F6FB;border-color:#C8D1E0;color:#374151}
+body.light .compound-answer-header{color:#1456CB}
+body.light #chat-window{background:#FFFFFF;border-color:#DDE3EE;box-shadow:0 8px 32px rgba(20,86,203,0.1)}
+body.light #chat-header{background:#1C2B4A}
+body.light #chat-messages{background:#FFFFFF}
+body.light #chat-input{background:#FFFFFF;color:#1a1a2e;border-color:#C8D1E0}
+body.light #chat-input-row{background:#FFFFFF;border-top-color:#DDE3EE}
+body.light .chat-msg.bot{background:#F3F6FB;color:#374151;border-color:#DDE3EE}
+body.light .theme-toggle{background:#F3F6FB;color:#6B7280;border-color:#C8D1E0}
+body.light .theme-toggle:hover{border-color:#1456CB;color:#1456CB}
+/* NGL viewer ALWAYS stays dark */
+body.light .viewer-col{background:#0d1220}
+body.light #viewer-canvas{background:#0d1220 !important}
 body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;min-height:100vh}
 
+/* THEME TOGGLE BUTTON */
+.theme-toggle{display:flex;align-items:center;gap:7px;padding:6px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text3);font-size:0.8rem;font-family:'IBM Plex Sans',sans-serif;font-weight:500;cursor:pointer;transition:all .2s}
+.theme-toggle:hover{border-color:var(--blue);color:var(--blue)}
+.theme-toggle svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+
 /* NAV */
-nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(20,86,203,0.06)}
+nav{background:rgba(11,15,26,0.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-logo-icon{width:32px;height:32px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.nav-logo-icon{width:32px;height:32px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(76,139,245,0.4)}
 .nav-logo-icon svg{width:18px;height:18px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .nav-logo-text{font-family:'Source Serif 4',serif;font-size:1.1rem;font-weight:600;color:var(--text)}
 .nav-logo-text span{color:var(--blue)}
-.nav-back{font-size:0.82rem;color:var(--blue);text-decoration:none;display:flex;align-items:center;gap:5px;font-weight:500}
-.nav-back svg{width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:2;stroke-linecap:round}
-.nav-back:hover{color:var(--blue2)}
+.nav-back{font-size:0.82rem;color:var(--text3);text-decoration:none;display:flex;align-items:center;gap:5px;font-weight:500;transition:color .15s}
+.nav-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.nav-back:hover{color:var(--blue)}
 
 /* BREADCRUMB */
-.breadcrumb{background:var(--white);border-bottom:1px solid var(--border);padding:0.5rem 2rem;font-size:0.72rem;color:var(--text4);font-family:'IBM Plex Mono',monospace;display:flex;align-items:center;gap:6px}
+.breadcrumb{background:var(--bg2);border-bottom:1px solid var(--border);padding:0.5rem 2rem;font-size:0.72rem;color:var(--text4);font-family:'IBM Plex Mono',monospace;display:flex;align-items:center;gap:6px}
 .breadcrumb a{color:var(--blue);text-decoration:none}
-.breadcrumb a:hover{text-decoration:underline}
 .breadcrumb-sep{color:var(--text4)}
 
-/* MATERIAL HEADER — like MP */
-.mat-header{background:var(--navy);padding:1.5rem 2rem}
-.mat-header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:2rem}
+/* MATERIAL HEADER */
+.mat-header{background:linear-gradient(135deg,#0d1525 0%,#111d35 50%,#0d1525 100%);padding:1.75rem 2rem;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.mat-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(76,139,245,0.08) 0%,transparent 60%)}
+.mat-header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:2rem;position:relative;z-index:1}
 .mat-header-left{display:flex;align-items:center;gap:1.5rem}
-.mat-icon-box{width:72px;height:72px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mat-icon-box{width:72px;height:72px;background:rgba(76,139,245,0.1);border:1px solid rgba(76,139,245,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .mat-icon-box canvas{border-radius:8px}
-.mat-formula{font-family:'Source Serif 4',serif;font-size:2.2rem;font-weight:600;color:white;line-height:1}
-.mat-sub{font-size:0.78rem;font-family:'IBM Plex Mono',monospace;color:#93B4D4;margin-top:6px}
-.mat-badges{display:flex;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap}
-.mat-badge{font-size:0.65rem;padding:3px 10px;border-radius:4px;font-weight:500;font-family:'IBM Plex Mono',monospace}
-.mat-badge.valid{background:rgba(5,122,85,0.25);color:#6EE7B7;border:1px solid rgba(5,122,85,0.3)}
-.mat-badge.invalid{background:rgba(200,30,30,0.25);color:#FCA5A5;border:1px solid rgba(200,30,30,0.3)}
-.mat-badge.warn{background:rgba(180,83,9,0.25);color:#FCD34D;border:1px solid rgba(180,83,9,0.3)}
+.mat-formula{font-family:'Source Serif 4',serif;font-size:2.4rem;font-weight:600;color:white;line-height:1;letter-spacing:-0.5px}
+.mat-sub{font-size:0.75rem;font-family:'IBM Plex Mono',monospace;color:var(--text3);margin-top:7px}
+.mat-badges{display:flex;gap:0.5rem;margin-top:0.7rem;flex-wrap:wrap}
+.mat-badge{font-size:0.65rem;padding:4px 12px;border-radius:20px;font-weight:500;font-family:'IBM Plex Mono',monospace}
+.mat-badge.valid{background:var(--green-light);color:var(--green);border:1px solid rgba(16,185,129,0.25)}
+.mat-badge.invalid{background:var(--red-light);color:var(--red);border:1px solid rgba(239,68,68,0.25)}
+.mat-badge.warn{background:var(--amber-light);color:var(--amber);border:1px solid rgba(245,158,11,0.25)}
 .mat-header-right{display:flex;gap:0.75rem;flex-shrink:0}
-.hdr-btn{font-size:0.78rem;padding:7px 16px;border-radius:5px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-weight:500;transition:all .15s;display:flex;align-items:center;gap:6px;text-decoration:none}
+.hdr-btn{font-size:0.78rem;padding:8px 18px;border-radius:6px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-weight:500;transition:all .15s;display:flex;align-items:center;gap:6px;text-decoration:none}
 .hdr-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
-.hdr-btn.primary{background:var(--blue);color:white;border:1px solid var(--blue)}
-.hdr-btn.primary:hover{background:var(--blue2)}
-.hdr-btn.secondary{background:rgba(255,255,255,0.08);color:#93B4D4;border:1px solid rgba(255,255,255,0.15)}
-.hdr-btn.secondary:hover{background:rgba(255,255,255,0.15);color:white}
+.hdr-btn.primary{background:var(--blue);color:white;border:1px solid var(--blue);box-shadow:0 0 16px rgba(76,139,245,0.3)}
+.hdr-btn.primary:hover{background:var(--blue2);box-shadow:0 0 24px rgba(76,139,245,0.5)}
+.hdr-btn.secondary{background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border2)}
+.hdr-btn.secondary:hover{background:rgba(255,255,255,0.1);color:var(--text)}
 
-/* PAGE LAYOUT — Materials Project style: viewer left, props right */
-.page-layout{max-width:1200px;margin:0 auto;padding:2rem;display:grid;grid-template-columns:1fr 380px;gap:2rem;align-items:start}
-.viewer-col{}
-.props-col{display:flex;flex-direction:column;gap:1rem}
-
-/* CONTENT SECTIONS */
-.content-section{background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(20,86,203,0.04)}
-.cs-head{padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.cs-head-icon{width:28px;height:28px;background:var(--blue);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.cs-head-icon svg{width:15px;height:15px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round}
-.cs-title{font-family:'Source Serif 4',serif;font-size:1rem;font-weight:600;color:var(--text)}
-.cs-body{padding:1.25rem}
+/* PAGE LAYOUT */
+.page-layout{max-width:1300px;margin:0 auto;padding:2rem;display:grid;grid-template-columns:1fr 360px;gap:2rem;align-items:start}
+.viewer-col{display:flex;flex-direction:column;position:relative}
+.props-col{display:flex;flex-direction:column;gap:1rem;position:sticky;top:72px}
 
 /* NGL VIEWER */
-#viewer-canvas{width:100%;height:520px;border-radius:8px;background:#1a1f2e;border:none;display:block;position:relative;overflow:hidden}
-.viewer-footer{margin-top:0.6rem;display:flex;align-items:center;justify-content:space-between}
-.viewer-info{font-size:0.7rem;font-family:'IBM Plex Mono',monospace;color:var(--text4)}
-.viewer-hint{font-size:0.7rem;color:var(--text4);font-style:italic}
-.viewer-controls{display:flex;gap:0.5rem;margin-top:0.75rem}
-.vctrl{font-size:0.72rem;padding:4px 12px;border-radius:4px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;border:1px solid var(--border2);background:var(--white);color:var(--text2);transition:all .15s}
-.vctrl:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
-.vctrl.active{background:var(--blue);color:white;border-color:var(--blue)}
+#viewer-canvas{width:100%;height:520px;border-radius:10px;background:#080c14;display:block;position:relative;overflow:hidden}
+.viewer-overlay{display:none}
+.viewer-info-bar{display:flex;align-items:center;justify-content:space-between;margin-top:0.4rem;padding:0 0.25rem}
+.viewer-info{font-size:0.68rem;font-family:'IBM Plex Mono',monospace;color:var(--text4)}
+.viewer-hint{font-size:0.68rem;color:var(--text4);font-style:italic}
 
-/* PROPERTIES GRID like MP */
+/* ATOM LEGEND — overlaid top-right */
+.atom-legend{position:absolute;top:0.75rem;right:0.75rem;display:flex;flex-direction:column;gap:0.35rem;background:rgba(11,15,26,0.85);backdrop-filter:blur(8px);border:1px solid var(--border2);border-radius:8px;padding:0.55rem 0.8rem;pointer-events:none;z-index:10}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:0.72rem;font-family:'IBM Plex Mono',monospace;color:var(--text2)}
+.legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.legend-name{font-weight:600;color:var(--text)}
+.legend-fullname{color:var(--text4);font-size:0.65rem}
+
+/* BELOW VIEWER — controls row */
+.below-viewer{display:flex;align-items:center;margin-top:0.75rem;margin-bottom:0.25rem}
+.viewer-controls{display:flex;gap:0.5rem}
+.vctrl{font-size:0.75rem;padding:6px 16px;border-radius:20px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;border:1px solid var(--border2);background:var(--bg3);color:var(--text3);transition:all .15s}
+.vctrl:hover{border-color:var(--blue);color:var(--blue)}
+.vctrl.active{background:var(--blue);color:white;border-color:var(--blue);box-shadow:0 0 10px rgba(76,139,245,0.3)}
+
+/* COMPOUND INFO — below viewer on left */
+.compound-info-section{margin-top:1rem;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem}
+.compound-info-header{font-size:0.63rem;font-family:'IBM Plex Mono',monospace;color:var(--text4);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem;display:flex;align-items:center;gap:8px}
+.compound-info-header::after{content:'';flex:1;height:1px;background:var(--border)}
+.compound-btns{display:flex;gap:0.5rem;flex-wrap:wrap}
+.compound-btn{font-size:0.78rem;padding:7px 14px;border-radius:20px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-weight:500;border:1px solid var(--border2);background:var(--bg3);color:var(--text3);transition:all .15s;display:flex;align-items:center;gap:5px}
+.compound-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.compound-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.compound-btn.active{background:var(--blue);color:white;border-color:var(--blue);box-shadow:0 0 10px rgba(76,139,245,0.3)}
+.compound-btn.active svg{stroke:white}
+.compound-answer{margin-top:0.85rem;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:0.9rem 1rem;font-size:0.83rem;color:var(--text2);line-height:1.75;display:none;height:220px;overflow-y:scroll;word-wrap:break-word;white-space:pre-wrap}
+.compound-answer::-webkit-scrollbar{width:5px}
+.compound-answer::-webkit-scrollbar-track{background:var(--bg3)}
+.compound-answer::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.compound-answer::-webkit-scrollbar-thumb:hover{background:var(--text4)}
+.compound-answer.visible{display:block}
+.compound-answer-header{font-size:0.65rem;font-family:'IBM Plex Mono',monospace;color:var(--blue);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.4rem}
+.compound-answer-loading{display:flex;align-items:center;gap:8px;color:var(--text4);font-style:italic;font-size:0.8rem}
+.compound-dots span{display:inline-block;animation:dotbounce 1.2s infinite;font-size:1rem;line-height:1}
+.compound-dots span:nth-child(2){animation-delay:.2s}
+.compound-dots span:nth-child(3){animation-delay:.4s}
+@keyframes dotbounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+
+/* RIGHT PANEL SECTIONS */
+.panel-section{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem}
+.panel-section-title{font-size:0.63rem;font-family:'IBM Plex Mono',monospace;color:var(--text4);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.85rem;display:flex;align-items:center;gap:8px}
+.panel-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* CELL PARAMETERS GRID */
+.cell-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.6rem}
+.cell-card{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:0.85rem 1rem}
+.cell-label{font-size:0.85rem;font-family:'IBM Plex Mono',monospace;color:#7EB8F5;font-weight:700;margin-bottom:6px;letter-spacing:0.02em}
+.cell-val{font-size:1.05rem;font-weight:600;color:var(--text);font-family:'IBM Plex Mono',monospace}
+.cell-unit{font-size:0.68rem;color:var(--text4);margin-left:3px}
+
+/* PROPERTIES TABLE */
 .prop-table{width:100%;border-collapse:collapse}
 .prop-table tr{border-bottom:1px solid var(--border)}
 .prop-table tr:last-child{border-bottom:none}
-.prop-table td{padding:0.7rem 1rem;font-size:0.85rem}
-.prop-table td:first-child{color:var(--text3);font-weight:400;width:45%}
-.prop-table td:last-child{color:var(--text);font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:0.82rem}
+.prop-table td{padding:0.65rem 0;font-size:0.83rem}
+.prop-table td:first-child{color:var(--text3);width:50%}
+.prop-table td:last-child{color:var(--blue);font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:0.8rem}
 .prop-highlight{color:var(--blue)!important}
 
-/* CELL PARAMETERS GRID */
-.cell-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem;margin-bottom:0.5rem}
-.cell-card{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:1rem 1.25rem}
-.cell-label{font-size:0.68rem;font-family:'IBM Plex Mono',monospace;color:var(--text4);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
-.cell-val{font-size:1rem;font-weight:600;color:var(--text);font-family:'IBM Plex Mono',monospace}
-.cell-unit{font-size:0.7rem;color:var(--text4);margin-left:3px}
-
-/* CIF FILE */
-.cif-actions{display:flex;gap:0.5rem;margin-bottom:0.75rem}
-.cif-btn{font-size:0.75rem;padding:6px 14px;border-radius:5px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-weight:500;transition:all .15s;border:1px solid var(--border2);background:var(--white);color:var(--text2);display:flex;align-items:center;gap:5px}
-.cif-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
-.cif-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
-.cif-btn.primary{background:var(--blue);color:white;border-color:var(--blue)}
-.cif-btn.primary:hover{background:var(--blue2)}
-.cif-btn.primary svg{stroke:white}
-.cif-note{font-size:0.72rem;color:var(--text4);margin-bottom:0.75rem;padding:0.5rem 0.75rem;background:var(--bg);border-radius:5px;border:1px solid var(--border);font-family:'IBM Plex Mono',monospace}
-#cifOut{background:#1C2B4A;border-radius:7px;padding:1.25rem;font-size:0.72rem;font-family:'IBM Plex Mono',monospace;color:#A8C7E8;white-space:pre;overflow:auto;max-height:320px;line-height:1.7}
-.cif-toggle{font-size:0.72rem;color:var(--blue);cursor:pointer;font-family:'IBM Plex Mono',monospace;margin-top:0.5rem;display:inline-block}
-.cif-toggle:hover{text-decoration:underline}
+/* RESPONSIVE */
+@media(max-width:900px){
+  .page-layout{grid-template-columns:1fr;padding:1rem}
+  .props-col{position:static}
+  .mat-header-inner{flex-direction:column;align-items:flex-start}
+  #viewer-canvas{height:380px}
+}
 
 /* LOADING STATE */
-.loading-overlay{position:fixed;inset:0;background:rgba(243,246,251,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200}
-.loading-spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:1rem}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-family:'Source Serif 4',serif;font-size:1.1rem;color:var(--text2);margin-bottom:0.5rem}
+.loading-overlay{position:fixed;inset:0;background:rgba(11,15,26,0.97);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200}
+.loading-crystal{width:60px;height:60px;margin-bottom:1.5rem;position:relative}
+.loading-crystal svg{width:60px;height:60px;stroke:var(--blue);fill:none;stroke-width:1.5;animation:crystalSpin 3s linear infinite;filter:drop-shadow(0 0 8px rgba(76,139,245,0.6))}
+@keyframes crystalSpin{to{transform:rotate(360deg)}}
+.loading-text{font-family:'Source Serif 4',serif;font-size:1.1rem;color:var(--text);margin-bottom:0.5rem}
 .loading-sub{font-size:0.78rem;color:var(--text4);font-family:'IBM Plex Mono',monospace}
+.loading-bar{width:200px;height:2px;background:var(--border);border-radius:2px;margin-top:1.5rem;overflow:hidden}
+.loading-bar-fill{height:100%;width:30%;background:var(--blue);border-radius:2px;animation:loadingPulse 1.5s ease-in-out infinite;box-shadow:0 0 8px var(--blue)}
+@keyframes loadingPulse{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}}
 
 /* ERROR STATE */
 .error-page{max-width:480px;margin:4rem auto;text-align:center;padding:2rem}
@@ -125,12 +208,40 @@ nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem
 .error-desc{font-size:0.85rem;color:var(--text3);line-height:1.7;margin-bottom:1.5rem}
 .error-btn{display:inline-block;padding:0.75rem 1.5rem;background:var(--blue);color:white;border-radius:6px;text-decoration:none;font-size:0.85rem;font-weight:500}
 
+/* GEMINI CHATBOT */
+#chat-bubble{position:fixed;bottom:28px;right:28px;z-index:1000}
+#chat-toggle{width:52px;height:52px;border-radius:50%;background:var(--blue);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(76,139,245,0.5);transition:all .2s}
+#chat-toggle:hover{background:var(--blue2);transform:scale(1.06)}
+#chat-toggle svg{width:22px;height:22px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#chat-window{position:absolute;bottom:64px;right:0;width:380px;background:var(--bg2);border:1px solid var(--border2);border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,0.5);display:none;flex-direction:column;overflow:hidden;max-height:520px}
+#chat-window.open{display:flex}
+#chat-header{background:var(--bg3);border-bottom:1px solid var(--border);padding:0.9rem 1rem;display:flex;align-items:center;gap:10px}
+#chat-close-btn{background:none;border:none;color:var(--text4);cursor:pointer;font-size:1rem;padding:2px 6px;border-radius:4px;transition:color .15s;margin-left:auto}
+#chat-close-btn:hover{color:var(--text)}
+#chat-header-icon{width:28px;height:28px;background:var(--blue-light);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#chat-header-icon svg{width:15px;height:15px;stroke:var(--blue);fill:none;stroke-width:2;stroke-linecap:round}
+#chat-header-title{font-size:0.88rem;font-weight:600;color:var(--text);font-family:'IBM Plex Sans',sans-serif}
+#chat-header-sub{font-size:0.63rem;color:var(--text4);font-family:'IBM Plex Mono',monospace;margin-top:1px}
+#chat-messages{flex:1;overflow-y:auto;padding:0.9rem;display:flex;flex-direction:column;gap:0.65rem;min-height:220px}
+#chat-messages::-webkit-scrollbar{width:4px}
+#chat-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.chat-msg{max-width:88%;padding:0.6rem 0.9rem;border-radius:10px;font-size:0.82rem;line-height:1.6;font-family:'IBM Plex Sans',sans-serif}
+.chat-msg.user{background:var(--blue);color:white;align-self:flex-end;border-bottom-right-radius:3px}
+.chat-msg.bot{background:var(--bg3);color:var(--text2);align-self:flex-start;border-bottom-left-radius:3px;border:1px solid var(--border)}
+.chat-msg.bot.typing{color:var(--text4);font-style:italic}
+#chat-input-row{padding:0.7rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;background:var(--bg2)}
+#chat-input{flex:1;border:1px solid var(--border2);border-radius:7px;padding:7px 11px;font-size:0.82rem;font-family:'IBM Plex Sans',sans-serif;outline:none;color:var(--text);background:var(--bg3);resize:none;min-height:36px;max-height:90px}
+#chat-input:focus{border-color:var(--blue)}
+#chat-send{width:34px;height:34px;border-radius:7px;background:var(--blue);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;align-self:flex-end}
+#chat-send:hover{background:var(--blue2)}
+#chat-send svg{width:14px;height:14px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round}
+
 /* RESPONSIVE */
 @media(max-width:900px){
-  .page-layout{grid-template-columns:1fr;padding:1rem}
+  .page-layout{grid-template-columns:1fr;height:auto}
+  .props-col{border-left:none;border-top:1px solid var(--border)}
+  #viewer-canvas{min-height:400px}
   .mat-header-inner{flex-direction:column;align-items:flex-start}
-  .cell-grid{grid-template-columns:repeat(2,1fr)}
-  #viewer-canvas{height:360px}
 }
 </style>
 </head>
@@ -138,9 +249,12 @@ nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem
 
 <!-- LOADING -->
 <div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-spinner"></div>
+  <div class="loading-crystal">
+    <svg viewBox="0 0 24 24"><polygon points="12,2 22,8 22,16 12,22 2,16 2,8"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/></svg>
+  </div>
   <div class="loading-text">Loading Crystal Structure</div>
   <div class="loading-sub" id="loadingSub">Connecting to CrysText...</div>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
 </div>
 
 <!-- NAV -->
@@ -155,6 +269,10 @@ nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     Back to Generator
   </a>
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+    <svg id="themeIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <span id="themeLabel">Light Mode</span>
+  </button>
 </nav>
 
 <!-- BREADCRUMB -->
@@ -195,73 +313,108 @@ nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem
 <!-- PAGE LAYOUT -->
 <div class="page-layout">
 
-  <!-- LEFT: NGL 3D VIEWER -->
+  <!-- LEFT: NGL VIEWER + CONTROLS + QUICK INFO -->
   <div class="viewer-col">
+
+    <!-- NGL viewer -->
     <div id="viewer-canvas"></div>
-    <div class="viewer-footer">
+
+    <!-- Info bar below viewer -->
+    <div class="viewer-info-bar">
       <div class="viewer-info" id="viewerInfo">—</div>
       <div class="viewer-hint">Drag to rotate · Scroll to zoom · Right-drag to pan</div>
     </div>
-    <div class="viewer-controls">
-      <button class="vctrl active" id="btn-ballstick" onclick="setStyle('ballstick',this)">Ball & Stick</button>
-      <button class="vctrl" id="btn-spacefill" onclick="setStyle('spacefill',this)">Space Fill</button>
-      <button class="vctrl" id="btn-wireframe" onclick="setStyle('wireframe',this)">Wireframe</button>
-      <button class="vctrl" id="btn-unitcell" onclick="toggleUnitCell(this)">Unit Cell</button>
+
+    <!-- Atom legend overlaid top-right inside viewer -->
+    <div class="atom-legend" id="atomLegend"></div>
+
+    <!-- Controls below viewer -->
+    <div class="below-viewer">
+      <div class="viewer-controls">
+        <button class="vctrl active" id="btn-ballstick" onclick="setStyle('ballstick',this)">Ball & Stick</button>
+        <button class="vctrl" id="btn-spacefill" onclick="setStyle('spacefill',this)">Space Fill</button>
+        <button class="vctrl" id="btn-wireframe" onclick="setStyle('wireframe',this)">Wireframe</button>
+      </div>
     </div>
 
-    <!-- CIF FILE — below viewer on left -->
-    <div class="content-section" id="sec-cif" style="margin-top:1.5rem">
-      <div class="cs-head">
-        <div class="cs-head-icon">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        </div>
-        <span class="cs-title">CIF File</span>
+    <!-- COMPOUND INFO QUICK ACTIONS below viewer -->
+    <div class="compound-info-section">
+      <div class="compound-info-header">Quick Info</div>
+      <div class="compound-btns">
+        <button class="compound-btn" id="btn-what" onclick="askCompound('what', this)">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          What is this?
+        </button>
+        <button class="compound-btn" id="btn-names" onclick="askCompound('names', this)">
+          <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          Names
+        </button>
+        <button class="compound-btn" id="btn-uses" onclick="askCompound('uses', this)">
+          <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          Uses
+        </button>
+        <button class="compound-btn" id="btn-funfact" onclick="askCompound('funfact', this)">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Fun Fact
+        </button>
       </div>
-      <div class="cs-body">
-        <div class="cif-note" id="cifNote">Showing essential data only. Click below to see all symmetry operations.</div>
-        <div class="cif-actions">
-          <button class="cif-btn primary" onclick="dlCIF()">
-            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download .cif
-          </button>
-          <button class="cif-btn" onclick="copyCIF()">Copy</button>
-        </div>
-        <pre id="cifOut"></pre>
-        <span class="cif-toggle" id="cifToggle" onclick="toggleCIF()">▼ Show Full CIF</span>
+      <div class="compound-answer" id="compoundAnswer">
+        <div class="compound-answer-header" id="compoundAnswerLabel">—</div>
+        <div id="compoundAnswerText"></div>
       </div>
     </div>
+
   </div>
 
   <!-- RIGHT: PROPERTIES PANEL -->
   <div class="props-col">
 
     <!-- CELL PARAMETERS -->
-    <div class="content-section" id="sec-cell">
-      <div class="cs-head">
-        <div class="cs-head-icon">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        </div>
-        <span class="cs-title">Cell Parameters</span>
-      </div>
-      <div class="cs-body">
-        <div class="cell-grid" id="cellGrid"></div>
-      </div>
+    <div class="panel-section">
+      <div class="panel-section-title">Cell Parameters</div>
+      <div class="cell-grid" id="cellGrid"></div>
     </div>
 
     <!-- PROPERTIES -->
-    <div class="content-section" id="sec-properties" style="margin-top:1rem">
-      <div class="cs-head">
-        <div class="cs-head-icon">
-          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        </div>
-        <span class="cs-title">Properties</span>
-      </div>
-      <div class="cs-body">
-        <table class="prop-table" id="propTable"></table>
-      </div>
+    <div class="panel-section">
+      <div class="panel-section-title">Properties</div>
+      <table class="prop-table" id="propTable"></table>
     </div>
 
   </div>
+</div>
+
+<!-- GEMINI CHATBOT -->
+<div id="chat-bubble">
+  <div id="chat-window">
+    <div id="chat-header">
+      <div id="chat-header-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div id="chat-header-text">
+        <div id="chat-header-title">Materials Assistant</div>
+        <div id="chat-header-sub">AI Assistant · Ask about this compound</div>
+      </div>
+      <button id="chat-close-btn" onclick="toggleChat()">✕</button>
+    </div>
+    <div id="chat-messages">
+      <div class="chat-msg bot" id="chat-welcome">Hi! I'm your materials science assistant. Ask me anything about this compound or crystal structure!</div>
+    </div>
+    <div id="chat-input-row">
+      <textarea id="chat-input" placeholder="Ask about this material..." rows="1" onkeydown="chatKeydown(event)"></textarea>
+      <button id="chat-send" onclick="sendChat()">
+        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+  <button id="chat-toggle" onclick="toggleChat()">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 2a10 10 0 0 1 0 20A10 10 0 0 1 12 2"/>
+      <path d="M2 12h4M18 12h4M12 2v4M12 18v4"/>
+      <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(45 12 12)"/>
+    </svg>
+  </button>
 </div>
 
 <script>
@@ -292,20 +445,20 @@ window.addEventListener('load', async () => {
   document.getElementById('loadingSub').textContent = `Loading ${formula} SG ${sg}...`;
   document.getElementById('bcFormula').textContent = `${formula} · SG ${sg}`;
 
-  // Check localStorage first
+  // Check localStorage first — use cache if ANY valid CIF is stored
   const cached = localStorage.getItem('crystext_result');
   if(cached){
     try{
       const data = JSON.parse(cached);
-      if(data.formula === formula && data.sg === sg){
+      if(data.cif && data.cif.length > 50){
         fullCIF = data.cif;
         validationData = data.validation || {};
         shortCIF = buildShortCIF(fullCIF);
-        renderPage(formula, sg, fullCIF, validationData);
+        renderPage(data.formula || formula, data.sg || sg, fullCIF, validationData);
         document.getElementById('loadingOverlay').style.display = 'none';
         return;
       }
-    } catch(e){}
+    } catch(e){ console.warn('Cache parse error:', e); }
   }
 
   // No cache — fetch from Flask
@@ -318,9 +471,14 @@ window.addEventListener('load', async () => {
     });
     const data = await res.json();
     if(data.error){ showError('Generation Failed', data.error); return; }
+    if(!data.cif || data.cif.length < 50){ showError('Empty CIF', 'Model returned an empty or invalid CIF. Please try again.'); return; }
     fullCIF = data.cif;
     validationData = data.validation || {};
     shortCIF = buildShortCIF(fullCIF);
+    // Save to cache for next time
+    localStorage.setItem('crystext_result', JSON.stringify({
+      formula, sg, cif: fullCIF, validation: validationData
+    }));
     renderPage(formula, sg, fullCIF, validationData);
     document.getElementById('loadingOverlay').style.display = 'none';
   } catch(e) {
@@ -386,6 +544,10 @@ function toggleCIF(){
 
 // ─── Render page ─────────────────────────────────────────────────────────────
 function renderPage(formula, sg, cif, val){
+  if(!cif || cif.length < 50){
+    showError('Empty Structure', 'The generated CIF was empty or invalid. Please go back and try again.');
+    return;
+  }
   const detFormula = val.detected_formula || formula;
   const detSG = val.detected_spacegroup || sg;
 
@@ -401,8 +563,6 @@ function renderPage(formula, sg, cif, val){
   badges.innerHTML += val.composition_match
     ? '<span class="mat-badge valid">✓ Composition Match</span>'
     : '<span class="mat-badge warn">⚠ Composition Mismatch</span>';
-
-  document.getElementById('cifOut').textContent = shortCIF || cif;
 
   // Cell parameters
   const cellA = cif.match(/_cell_length_a\s+([\d.]+)/);
@@ -421,7 +581,6 @@ function renderPage(formula, sg, cif, val){
     {l:'β', v:beta ?parseFloat(beta[1]).toFixed(2)+'°':'—',  u:''},
     {l:'γ', v:gamma?parseFloat(gamma[1]).toFixed(2)+'°':'—', u:''},
   ];
-  if(vol) cellParams.push({l:'Volume', v:parseFloat(vol[1]).toFixed(2), u:'Å³'});
 
   document.getElementById('cellGrid').innerHTML = cellParams.map(p=>`
     <div class="cell-card">
@@ -437,10 +596,7 @@ function renderPage(formula, sg, cif, val){
   const sgName = cif.match(/_symmetry_space_group_name_H-M\s+(\S+)/);
 
   const props = [
-    ['Formula (Structural)', formulaStruct?formulaStruct[1]:'—'],
-    ['Formula (Full)', formulaSum?formulaSum[1].replace(/'/g,''):'—'],
-    ['Detected Space Group', detSG + (sgName ? ' ('+sgName[1]+')' : '')],
-    ['Requested Space Group', sg],
+    ['Space Group', detSG + (sgName ? ' ('+sgName[1]+')' : '')],
     ['Z (formula units)', Z?Z[1]:'—'],
     ['Volume', vol ? parseFloat(vol[1]).toFixed(2)+' Å³' : '—'],
     ['Valid CIF', val.valid ? 'Yes ✓' : 'No ✗'],
@@ -562,10 +718,14 @@ function buildNGLViewer(cifText){
 
   // Create NGL stage with dark background like Materials Project
   nglStage = new NGL.Stage('viewer-canvas', {
-    backgroundColor: '#1a1f2e',
+    backgroundColor: '#0d1220',
     quality: 'high',
     impostor: true,
+    mousePreset: 'default',
   });
+
+  // Enable scroll zoom explicitly
+  nglStage.mouseControls.add('scroll-wheel', NGL.MouseActions.zoomScroll);
 
   // Handle window resize
   window.addEventListener('resize', () => { if(nglStage) nglStage.handleResize(); });
@@ -599,6 +759,9 @@ function buildNGLViewer(cifText){
     // Update info
     const atomCount = comp.structure ? comp.structure.atomCount : atomsData.length;
     info.textContent = `${atomCount} atoms · SG: ${validationData.detected_spacegroup || '?'} · NGL Viewer`;
+
+    // Build color legend
+    buildAtomLegend();
 
   }).catch(err => {
     console.error('NGL load error:', err);
@@ -650,12 +813,54 @@ function toggleUnitCell(btn){
   btn.classList.toggle('active', unitCellVisible);
 }
 
+// ─── Atom Color Legend ────────────────────────────────────────────────────────
+// CPK colors matching NGL's default element coloring
+const CPK_COLORS = {
+  H:'#FFFFFF', He:'#D9FFFF', Li:'#CC80FF', Be:'#C2FF00', B:'#FFB5B5',
+  C:'#909090', N:'#3050F8', O:'#FF0D0D', F:'#90E050', Ne:'#B3E3F5',
+  Na:'#AB5CF2', Mg:'#8AFF00', Al:'#BFA6A6', Si:'#F0C8A0', P:'#FF8000',
+  S:'#FFFF30', Cl:'#1FF01F', Ar:'#80D1E3', K:'#8F40D4', Ca:'#3DFF00',
+  Ti:'#BFC2C7', V:'#A6A6AB', Cr:'#8A99C7', Mn:'#9C7AC7', Fe:'#E06633',
+  Co:'#F090A0', Ni:'#50D050', Cu:'#C88033', Zn:'#7D80B0', Ga:'#C28F8F',
+  Ge:'#668F8F', As:'#BD80E3', Se:'#FFA100', Br:'#A62929', Kr:'#5CB8D1',
+  Sr:'#00FF00', Y:'#94FFFF', Zr:'#94E0E0', Nb:'#73C2C9', Mo:'#54B5B5',
+  Ba:'#00C900', La:'#70D4FF', Ce:'#FFFFC7', Pb:'#575961', Bi:'#9E4FB5',
+  default:'#A0A0A0'
+};
+
+const ELEMENT_NAMES = {
+  H:'Hydrogen', He:'Helium', Li:'Lithium', Be:'Beryllium', B:'Boron',
+  C:'Carbon', N:'Nitrogen', O:'Oxygen', F:'Fluorine', Na:'Sodium',
+  Mg:'Magnesium', Al:'Aluminum', Si:'Silicon', P:'Phosphorus', S:'Sulfur',
+  Cl:'Chlorine', K:'Potassium', Ca:'Calcium', Ti:'Titanium', V:'Vanadium',
+  Cr:'Chromium', Mn:'Manganese', Fe:'Iron', Co:'Cobalt', Ni:'Nickel',
+  Cu:'Copper', Zn:'Zinc', Ga:'Gallium', Ge:'Germanium', As:'Arsenic',
+  Sr:'Strontium', Y:'Yttrium', Zr:'Zirconium', Ba:'Barium', La:'Lanthanum',
+  Ce:'Cerium', Pb:'Lead', Bi:'Bismuth', Au:'Gold', Ag:'Silver', Pt:'Platinum',
+  Li:'Lithium', Co:'Cobalt',
+};
+
+function buildAtomLegend(){
+  const legend = document.getElementById('atomLegend');
+  if(!legend || !atomsData.length) return;
+  const elements = [...new Set(atomsData.map(a => a.element))];
+  legend.innerHTML = elements.map(el => {
+    const color = CPK_COLORS[el] || CPK_COLORS.default;
+    const fullName = ELEMENT_NAMES[el] || el;
+    return `<div class="legend-item">
+      <div class="legend-dot" style="background:${color}"></div>
+      <span class="legend-name">${el}</span>
+      <span class="legend-fullname">${fullName}</span>
+    </div>`;
+  }).join('');
+}
+
 // ─── Icon canvas (header thumbnail) ─────────────────────────────────────────
 function buildIconCanvas(){
   const c = document.getElementById('iconCanvas');
   const ctx = c.getContext('2d');
   if(!atomsData.length) return;
-  const EL_COLORS={Na:'#F97316',Cl:'#818CF8',Ti:'#60A5FA',O:'#F87171',Fe:'#A78BFA',Ba:'#34D399',Ca:'#FBBF24',K:'#F472B6',default:'#60A5FA'};
+  const EL_COLORS = CPK_COLORS;
   ctx.fillStyle='rgba(255,255,255,0.05)';ctx.fillRect(0,0,64,64);
   const els=[...new Set(atomsData.map(a=>a.element))].slice(0,4);
   const positions=[[16,16],[48,16],[16,48],[48,48]];
@@ -713,6 +918,218 @@ function dlCIF(){
   const blob=new Blob([fullCIF],{type:'text/plain'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download=(validationData.detected_formula||formula)+'.cif';a.click();
+}
+
+// ─── Theme Toggle ─────────────────────────────────────────────────────────────
+let isLight = false;
+function toggleTheme(){
+  isLight = !isLight;
+  document.body.classList.toggle('light', isLight);
+  document.getElementById('themeLabel').textContent = isLight ? 'Dark Mode' : 'Light Mode';
+  const icon = document.getElementById('themeIcon');
+  icon.innerHTML = isLight
+    ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+    : '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  // NGL viewer always stays dark — do NOT change its background
+  localStorage.setItem('crystext_theme', isLight ? 'light' : 'dark');
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  if(localStorage.getItem('crystext_theme') === 'light'){ isLight=false; toggleTheme(); }
+});
+
+// ─── GEMINI API KEY ───────────────────────────────────────────────────────────
+const GEMINI_API_KEY = 'key';
+const GROQ_API_KEY = 'key'; // paste gsk_... key here
+
+// ─── AI Call — Groq first, Gemini fallback ────────────────────────────────────
+async function callAI(systemPrompt, userPrompt) {
+
+  // 1. Try Groq first (fastest + most reliable)
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        max_tokens: 400,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    if(data.choices?.[0]?.message?.content) {
+      return data.choices[0].message.content;
+    }
+    console.warn('Groq returned no content, trying Gemini...');
+  } catch(e) {
+    console.warn('Groq failed, trying Gemini...', e);
+  }
+
+  // 2. Fallback — Gemini models
+  const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+  for(const model of GEMINI_MODELS) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: userPrompt }] }],
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            generationConfig: { maxOutputTokens: 400, temperature: 0.7 }
+          })
+        }
+      );
+      const data = await res.json();
+      if(data.error && (data.error.code === 503 || data.error.code === 429)) {
+        console.warn(`${model} unavailable, trying next...`);
+        continue;
+      }
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if(text) return text;
+    } catch(e) {
+      console.warn(`${model} failed, trying next...`);
+    }
+  }
+
+  return null; // all failed
+}
+
+// ─── Natural Language Query Parser ───────────────────────────────────────────
+// Parses inputs like "generate a structure for TiCl with space group 98"
+// Returns {formula, sg} or null if can't parse
+function parseNaturalLanguageQuery(input) {
+  if(!input) return null;
+  // Direct format: "TiCl 98" or "NaCl 225"
+  const directMatch = input.trim().match(/^([A-Za-z][A-Za-z0-9]*)\s+(\d{1,3})$/);
+  if(directMatch) return { formula: directMatch[1], sg: directMatch[2] };
+
+  // Extract formula — look for chemical formula pattern
+  const formulaMatch = input.match(/\b([A-Z][a-z]?(?:\d*[A-Z][a-z]?)*\d*)\b/);
+  // Extract space group number
+  const sgMatch = input.match(/(?:space\s*group|sg|spacegroup|space_group)[^\d]*(\d{1,3})/i)
+                || input.match(/\b(\d{1,3})\b/);
+
+  if(formulaMatch && sgMatch) {
+    return { formula: formulaMatch[1], sg: sgMatch[1] };
+  }
+  return null;
+}
+
+// ─── Compound Info Quick Buttons ─────────────────────────────────────────────
+async function askCompound(type, btnEl) {
+  const answerBox = document.getElementById('compoundAnswer');
+  const answerLabel = document.getElementById('compoundAnswerLabel');
+  const answerText = document.getElementById('compoundAnswerText');
+
+  // Toggle active state on buttons
+  document.querySelectorAll('.compound-btn').forEach(b => b.classList.remove('active'));
+  if(btnEl) btnEl.classList.add('active');
+
+  const currentFormula = validationData.detected_formula || formula || 'this compound';
+
+  // Build prompts fresh with current formula
+  const prompts = {
+    what: `In 3-4 sentences, explain what ${currentFormula} is. Cover its crystal structure type, bonding, and basic chemistry. Be concise and clear for a materials science audience.`,
+    names: `List the common names, trade names, and any alternative chemical names for ${currentFormula}. If it has a well-known everyday name (like "table salt" for NaCl), mention that first. Keep it short — just the names with a brief note on each.`,
+    uses: `What are the main practical uses and applications of ${currentFormula}? List 4-6 key uses spanning different industries or fields. Be specific and interesting.`,
+    funfact: `Share one genuinely interesting or surprising fun fact about ${currentFormula} — something that would impress someone at a materials science poster session. Keep it to 2-3 sentences.`,
+  };
+  const labels = {
+    what: '🔬 What is this compound?',
+    names: '🏷️ Common Names',
+    uses: '⚙️ Uses & Applications',
+    funfact: '⭐ Fun Fact',
+  };
+
+  const prompt = prompts[type];
+  answerLabel.textContent = labels[type];
+  answerText.innerHTML = '<div class="compound-answer-loading">Loading content<span class="compound-dots"><span>.</span><span>.</span><span>.</span></span></div>';
+  answerBox.classList.add('visible');
+  answerBox.scrollTop = 0;
+
+  const systemPrompt = `You are a materials science expert. The user is viewing the crystal structure for ${currentFormula} (Space Group ${sg}). Give accurate, engaging, concise answers. Use plain text without markdown symbols like ** or *.`;
+
+  try {
+    const text = await callAI(systemPrompt, prompt);
+    if(!text){
+      answerText.textContent = 'Service is busy right now. Please try again in a moment.';
+      if(btnEl) btnEl.classList.remove('active');
+      return;
+    }
+    answerText.innerHTML = text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\n/g, '<br>');
+  } catch(e) {
+    answerText.textContent = 'Could not load content. Please try again.';
+    if(btnEl) btnEl.classList.remove('active');
+  }
+}
+
+// ─── Chatbot ─────────────────────────────────────────────────────────────────
+let chatOpen = false;
+let chatHistory = [];
+
+function toggleChat(){
+  chatOpen = !chatOpen;
+  const win = document.getElementById('chat-window');
+  win.classList.toggle('open', chatOpen);
+  if(chatOpen) document.getElementById('chat-input').focus();
+}
+
+function chatKeydown(e){
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }
+}
+
+function appendMsg(role, text, isTyping=false){
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + role + (isTyping ? ' typing' : '');
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+async function sendChat(){
+  const input = document.getElementById('chat-input');
+  const userText = input.value.trim();
+  if(!userText) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  appendMsg('user', userText);
+
+  const typingDiv = appendMsg('bot', 'Thinking...', true);
+  const currentFormula = validationData.detected_formula || formula || 'this compound';
+
+  // Build chat history as simple string for context
+  const systemPrompt = `You are a materials science expert assistant embedded in CrysText, a crystal structure generation app. The user is viewing the crystal structure for ${currentFormula} (Space Group ${sg || '?'}). Answer questions about this material, its properties, crystal structure, applications, and related materials science topics. Be concise but accurate. Use proper scientific terminology.`;
+
+  try {
+    const reply = await callAI(systemPrompt, userText);
+    if(!reply){
+      typingDiv.textContent = 'Service is busy right now. Please try again in a moment.';
+      typingDiv.classList.remove('typing');
+      return;
+    }
+    typingDiv.innerHTML = reply
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\n/g, '<br>');
+    typingDiv.classList.remove('typing');
+  } catch(e) {
+    typingDiv.textContent = 'Could not connect. Please try again.';
+    typingDiv.classList.remove('typing');
+  }
 }
 </script>
 </body>

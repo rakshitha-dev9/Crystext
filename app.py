@@ -28,7 +28,7 @@ app = Flask(__name__)
 CORS(app)
 
 BASE_MODEL_ID = "mistralai/Mistral-7B-v0.3"
-LORA_MODEL_ID = "Charanya-2026/crystext-mistral-27k"
+LORA_MODEL_ID = "vaishna28/shuffle_20k"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 print(f"\n{'=' * 60}")
@@ -335,13 +335,43 @@ def chat():
         data = request.get_json() or {}
         messages = data.get('messages', [])
         api_key = data.get('api_key', '')
+        groq_key = data.get('groq_key', '')
 
-        if not api_key:
-            return jsonify({"error": "API key missing"}), 400
         if not messages:
             return jsonify({"error": "No messages provided"}), 400
 
         SYSTEM_PROMPT = """You are a specialized materials science assistant embedded in CrysText. You ONLY answer questions related to crystal structures, space groups, CIF files, materials science, QLoRA, DFT, and the MP-20 dataset. For anything else say: I'm specialized in materials science only!"""
+
+        # 1. Try Groq first (fastest + most reliable)
+        if groq_key:
+            try:
+                groq_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+                for msg in messages:
+                    groq_messages.append({"role": msg['role'], "content": msg['content']})
+
+                groq_payload = json_lib.dumps({
+                    "model": "llama-3.3-70b-versatile",
+                    "messages": groq_messages,
+                    "max_tokens": 500,
+                    "temperature": 0.7
+                }).encode('utf-8')
+
+                req = urllib.request.Request(
+                    'https://api.groq.com/openai/v1/chat/completions',
+                    data=groq_payload,
+                    headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {groq_key}'},
+                    method='POST'
+                )
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    result = json_lib.loads(resp.read().decode('utf-8'))
+                    reply = result['choices'][0]['message']['content']
+                    return jsonify({"reply": reply, "model_used": "groq/llama-3.3-70b"})
+            except Exception as e:
+                print(f"Groq failed, trying Gemini: {e}")
+
+        # 2. Fallback — Gemini
+        if not api_key:
+            return jsonify({"error": "No API keys provided"}), 400
 
         gemini_contents = []
         for msg in messages:
@@ -354,18 +384,31 @@ def chat():
             "generationConfig": {"maxOutputTokens": 500, "temperature": 0.7}
         }).encode('utf-8')
 
-        url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}'
-        req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'}, method='POST')
+        GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite']
+        last_error = None
 
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            result = json_lib.loads(resp.read().decode('utf-8'))
-            reply = result['candidates'][0]['content']['parts'][0]['text']
-            return jsonify({"reply": reply})
+        for model in GEMINI_MODELS:
+            try:
+                url = f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}'
+                req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'}, method='POST')
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    result = json_lib.loads(resp.read().decode('utf-8'))
+                    reply = result['candidates'][0]['content']['parts'][0]['text']
+                    return jsonify({"reply": reply, "model_used": model})
+            except urllib.error.HTTPError as e:
+                error_body = e.read().decode('utf-8')
+                print(f"Gemini {model} error: {e.code} - {error_body}")
+                if e.code in (503, 429):
+                    last_error = f"Gemini error {e.code}: {error_body}"
+                    continue
+                return jsonify({"error": f"Gemini error {e.code}: {error_body}"}), 500
+            except Exception as e:
+                print(f"Gemini {model} failed: {e}")
+                last_error = str(e)
+                continue
 
-    except urllib.error.HTTPError as e:
-        error_body = e.read().decode('utf-8')
-        print(f"Gemini error: {e.code} - {error_body}")
-        return jsonify({"error": f"Gemini error {e.code}: {error_body}"}), 500
+        return jsonify({"error": f"All models unavailable. Last error: {last_error}"}), 503
+
     except Exception as e:
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500

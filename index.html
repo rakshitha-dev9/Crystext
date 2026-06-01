@@ -17,6 +17,41 @@
   --amber:#B45309;--amber-light:#FFFBEB;
   --navy:#1C2B4A;
 }
+
+/* DARK MODE */
+body.dark{
+  --blue:#4C8BF5;--blue2:#6BA3FF;--blue-light:rgba(76,139,245,0.12);--blue-mid:rgba(76,139,245,0.25);
+  --text:#E8EDF5;--text2:#C8D5E8;--text3:#8FA3BE;--text4:#5A7290;
+  --bg:#131929;--white:#1A2235;
+  --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.16);
+  --green:#10B981;--green-light:rgba(16,185,129,0.12);
+  --red:#EF4444;--red-light:rgba(239,68,68,0.12);
+  --amber:#F59E0B;--amber-light:rgba(245,158,11,0.12);
+  --navy:#0d1525;
+}
+body.dark nav{background:#1A2235;border-bottom-color:rgba(255,255,255,0.09)}
+body.dark .hero{background:linear-gradient(135deg,#0a1020 0%,#0e1f40 100%)}
+body.dark .panel{background:#1A2235}
+body.dark .field input{background:#212D42;color:var(--text);border-color:var(--border2)}
+body.dark .field input::placeholder{color:var(--text4)}
+body.dark .nl-textarea{background:#212D42;color:var(--text)}
+body.dark .out-placeholder{background:#1A2235}
+body.dark .result-panel{background:#1A2235}
+body.dark #cifOut{background:#212D42;border-color:var(--border2);color:#A8C7E8}
+body.dark .prop-card{background:#212D42}
+body.dark .chip{background:#212D42;color:var(--text3)}
+body.dark .info-box{background:#1A2235}
+body.dark .info-box-head{background:#212D42}
+body.dark .cif-btn{background:#212D42;color:var(--text2);border-color:var(--border2)}
+body.dark .step-card{background:#1A2235}
+body.dark .footer{background:#0a1020}
+body.dark .theme-toggle-idx{background:#212D42;color:var(--text3);border-color:var(--border2)}
+
+/* THEME TOGGLE */
+.theme-toggle-idx{display:flex;align-items:center;gap:7px;padding:6px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--bg);color:var(--text3);font-size:0.8rem;font-family:'IBM Plex Sans',sans-serif;font-weight:500;cursor:pointer;transition:all .2s;flex-shrink:0}
+.theme-toggle-idx:hover{border-color:var(--blue);color:var(--blue)}
+.theme-toggle-idx svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+
 body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;min-height:100vh}
 
 /* NAV */
@@ -27,12 +62,13 @@ nav{
   position:sticky;top:0;z-index:100;
   box-shadow:0 1px 4px rgba(20,86,203,0.06);
 }
-.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
 .nav-logo-icon{width:34px;height:34px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center}
 .nav-logo-icon svg{width:20px;height:20px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .nav-logo-text{font-family:'Source Serif 4',serif;font-size:1.15rem;font-weight:600;color:var(--text)}
 .nav-logo-text span{color:var(--blue)}
-.nav-center{display:flex;align-items:center}
+.nav-center{display:flex;align-items:center;flex:1;justify-content:center}
+.nav-right{display:flex;align-items:center;flex-shrink:0}
 .nav-item{font-size:0.92rem;color:var(--text3);text-decoration:none;padding:0 1.25rem;height:58px;display:flex;align-items:center;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;font-weight:400;cursor:pointer;letter-spacing:0.01em}
 .nav-item:hover{color:var(--text2)}
 .nav-item.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:500}
@@ -93,6 +129,24 @@ nav{
 .gen-btn svg{width:15px;height:15px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .gen-btn:hover{background:var(--blue2)}
 .gen-btn:disabled{opacity:0.4;cursor:not-allowed}
+
+/* NATURAL LANGUAGE INPUT MODE */
+.input-mode-toggle{display:flex;gap:0;margin-bottom:1.1rem;border:1px solid var(--border2);border-radius:6px;overflow:hidden;background:var(--bg)}
+.mode-btn{flex:1;padding:7px 10px;font-size:0.72rem;font-family:'IBM Plex Sans',sans-serif;font-weight:500;border:none;background:transparent;color:var(--text3);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.mode-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.mode-btn.active{background:var(--blue);color:white}
+.mode-btn:not(.active):hover{background:var(--border);color:var(--text2)}
+.nl-field{margin-bottom:1.1rem;display:none}
+.nl-field.visible{display:block}
+.nl-textarea{width:100%;padding:0.65rem 0.9rem;border:1px solid var(--border2);border-radius:5px;font-size:0.85rem;font-family:'IBM Plex Sans',sans-serif;color:var(--text);background:var(--white);outline:none;resize:none;min-height:72px;transition:border-color .15s,box-shadow .15s;line-height:1.5}
+.nl-textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(20,86,203,0.08)}
+.nl-textarea::placeholder{color:var(--text4)}
+.nl-parsed{margin-top:0.4rem;padding:0.4rem 0.7rem;background:var(--green-light);border:1px solid rgba(5,122,85,0.2);border-radius:4px;font-size:0.7rem;font-family:'IBM Plex Mono',monospace;color:var(--green);display:none}
+.nl-parsed.visible{display:block}
+.nl-error{margin-top:0.4rem;padding:0.4rem 0.7rem;background:var(--amber-light);border:1px solid rgba(180,83,9,0.2);border-radius:4px;font-size:0.7rem;font-family:'IBM Plex Mono',monospace;color:var(--amber);display:none}
+.nl-error.visible{display:block}
+.structured-fields{transition:opacity .15s}
+.structured-fields.hidden{display:none}
 
 /* ABOUT BOX */
 .info-box{background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:1rem;box-shadow:0 1px 3px rgba(20,86,203,0.04)}
@@ -168,6 +222,31 @@ nav{
 .cif-btn.primary svg{stroke:white}
 #cifOut{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:1rem;font-size:0.7rem;font-family:'IBM Plex Mono',monospace;color:var(--text2);white-space:pre;overflow:auto;max-height:300px;line-height:1.65}
 
+/* STREAMING CIF */
+.stream-wrap{display:none;margin-top:1rem;background:#0d1525;border-radius:8px;overflow:hidden;border:1px solid rgba(76,139,245,0.2)}
+.stream-header{padding:0.5rem 0.85rem;background:rgba(76,139,245,0.1);border-bottom:1px solid rgba(76,139,245,0.15);display:flex;align-items:center;gap:8px;font-size:0.68rem;font-family:'IBM Plex Mono',monospace;color:#4C8BF5}
+.stream-dot{width:6px;height:6px;border-radius:50%;background:#4C8BF5;animation:streamPulse 1s ease-in-out infinite}
+@keyframes streamPulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.stream-body{padding:0.85rem;font-size:0.68rem;font-family:'IBM Plex Mono',monospace;color:#5B8FBF;line-height:1.7;max-height:160px;overflow:hidden;position:relative}
+.stream-body::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,#0d1525)}
+#streamText{color:#7EB8E8}
+.stream-cursor{display:inline-block;width:2px;height:12px;background:#4C8BF5;animation:blink .7s step-end infinite;vertical-align:middle;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+
+/* VISUALIZE BUTTON */
+.visualize-btn{width:100%;padding:1rem;background:var(--blue);color:white;border:none;border-radius:6px;font-size:0.95rem;font-weight:600;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .15s;margin-top:1.25rem;letter-spacing:0.02em}
+.visualize-btn svg{width:18px;height:18px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.visualize-btn:hover{background:var(--blue2)}
+
+/* CIF PREVIEW in result panel */
+.cif-preview-wrap{padding:1.25rem;border-top:1px solid var(--border)}
+.cif-preview-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem}
+.cif-preview-title{font-size:0.7rem;font-weight:600;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace}
+.cif-preview-actions{display:flex;gap:0.5rem;align-items:center}
+#cifOut{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:1rem;font-size:0.7rem;font-family:'IBM Plex Mono',monospace;color:var(--text2);white-space:pre;overflow:auto;line-height:1.65;max-height:260px}
+.cif-expand-btn{font-size:0.7rem;color:var(--blue);cursor:pointer;font-family:'IBM Plex Mono',monospace;padding:3px 8px;border:1px solid var(--border2);border-radius:4px;background:var(--white);transition:all .15s}
+.cif-expand-btn:hover{border-color:var(--blue);background:var(--blue-light)}
+
 /* HOW IT WORKS */
 .steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
 .step-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:2.5rem 2rem;border-top:4px solid var(--blue)}
@@ -212,7 +291,12 @@ nav{
     <span class="nav-item" onclick="document.getElementById('generate').scrollIntoView({behavior:'smooth'})">Generate</span>
     <span class="nav-item" onclick="document.getElementById('howitworks').scrollIntoView({behavior:'smooth'})">How it Works</span>
   </div>
-  <div></div>
+  <div class="nav-right">
+    <button class="theme-toggle-idx" id="idxThemeToggle" onclick="toggleIndexTheme()">
+      <svg id="idxThemeIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <span id="idxThemeLabel">Dark Mode</span>
+    </button>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -263,6 +347,29 @@ nav{
             <span class="panel-title">Input Parameters</span>
           </div>
           <div class="panel-body">
+
+            <!-- INPUT MODE TOGGLE -->
+            <div class="input-mode-toggle">
+              <button class="mode-btn active" id="modeStructured" onclick="setInputMode('structured')">
+                <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="4" rx="1"/><rect x="3" y="15" width="18" height="4" rx="1"/></svg>
+                Structured
+              </button>
+              <button class="mode-btn" id="modeNL" onclick="setInputMode('nl')">
+                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Natural Language
+              </button>
+            </div>
+
+            <!-- NATURAL LANGUAGE INPUT -->
+            <div class="nl-field" id="nlField">
+              <label style="display:block;font-size:0.7rem;font-weight:500;color:var(--text3);margin-bottom:0.4rem;letter-spacing:0.08em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace">Describe your structure</label>
+              <textarea class="nl-textarea" id="nlInput" placeholder="e.g. generate a structure for TiCl with space group 98&#10;or: NaCl in rock salt structure 225&#10;or: iron oxide Fe2O3 space group 167" oninput="parseNLInput()" onkeydown="nlKeydown(event)"></textarea>
+              <div class="nl-parsed" id="nlParsed"></div>
+              <div class="nl-error" id="nlError"></div>
+            </div>
+
+            <!-- STRUCTURED FIELDS -->
+            <div class="structured-fields" id="structuredFields">
             <div class="field">
               <label>Chemical Formula</label>
               <input id="formulaIn" type="text" placeholder="e.g. NaCl, BaTiO3, Fe2O3" autocomplete="off"/>
@@ -272,6 +379,7 @@ nav{
               <label>Space Group Number</label>
               <input id="sgIn" type="text" placeholder="1 – 230" autocomplete="off"/>
               <div class="field-hint">Integer from 1 to 230 (e.g. 225 = Fm-3m)</div>
+            </div>
             </div>
             <div class="divider"></div>
             <div class="quick-title">Quick Examples</div>
@@ -294,6 +402,16 @@ nav{
                 <div class="lstep" id="s2"><div class="lstep-dot"></div>Running model inference</div>
                 <div class="lstep" id="s3"><div class="lstep-dot"></div>Validating with pymatgen</div>
                 <div class="lstep" id="s4"><div class="lstep-dot"></div>Building 3D structure</div>
+              </div>
+              <!-- STREAMING CIF PREVIEW -->
+              <div class="stream-wrap" id="streamWrap">
+                <div class="stream-header">
+                  <div class="stream-dot"></div>
+                  Generating CIF — model inference running...
+                </div>
+                <div class="stream-body">
+                  <pre id="streamText"></pre><span class="stream-cursor"></span>
+                </div>
               </div>
             </div>
             <div class="error-wrap" id="errWrap"></div>
@@ -320,42 +438,38 @@ nav{
             </div>
             <div class="result-badges" id="resBadges"></div>
           </div>
-          <div class="tabs">
-            <div class="tab active" onclick="switchTab('viewer',this)">
-              <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-              3D Structure
-            </div>
-            <div class="tab" onclick="switchTab('props',this)">
-              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-              Properties
-            </div>
-            <div class="tab" onclick="switchTab('cif',this)">
-              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              CIF File
-            </div>
-          </div>
-          <div class="viewer-wrap" id="tabViewer">
-            <canvas id="viewer-canvas"></canvas>
-            <div class="viewer-bottom">
-              <div class="viewer-info" id="viewerInfo">—</div>
-              <div class="viewer-hint">Drag to rotate · Scroll to zoom</div>
-            </div>
-          </div>
-          <div class="props-wrap" id="tabProps">
-            <div class="props-sub-head">Cell Parameters</div>
-            <div class="prop-grid" id="propGrid"></div>
-            <div class="props-sub-head">Validation Results</div>
+
+          <!-- VALIDATION -->
+          <div class="props-wrap" style="display:block" id="resProps">
+            <div class="props-sub-head">Validation</div>
             <div class="prop-grid" id="valGrid"></div>
           </div>
-          <div class="cif-wrap" id="tabCif">
-            <div class="cif-actions">
-              <button class="cif-btn primary" onclick="dlCIF()">
-                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Download .cif
-              </button>
-              <button class="cif-btn" onclick="copyCIF()">Copy to Clipboard</button>
+
+          <!-- CIF PREVIEW -->
+          <div class="cif-preview-wrap">
+            <div class="cif-preview-head">
+              <span class="cif-preview-title">CIF File</span>
+              <div class="cif-preview-actions">
+                <button class="cif-expand-btn" id="cifExpandBtn" onclick="toggleCIFExpand()">▼ Show Full CIF</button>
+                <button class="cif-btn" onclick="copyCIF()">
+                  <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Copy
+                </button>
+                <button class="cif-btn primary" onclick="dlCIF()">
+                  <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Download .cif
+                </button>
+              </div>
             </div>
             <pre id="cifOut"></pre>
+          </div>
+
+          <!-- VISUALIZE BUTTON -->
+          <div style="padding:0 1.25rem 1.25rem">
+            <button class="visualize-btn" onclick="openStructurePage()">
+              <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              Visualize 3D Structure →
+            </button>
           </div>
         </div>
       </div>
@@ -397,7 +511,7 @@ nav{
   <p>Fine-tuned on the Materials Project MP-20 benchmark dataset. Based on the research by Mohanty et al. (2025).</p>
   <div class="footer-links">
     <a href="https://github.com/rakshitha-dev9/Crystext" target="_blank" class="footer-link">GitHub ↗</a>
-    <a href="https://huggingface.co/Charanya-2026/crystext-mistral-27k" target="_blank" class="footer-link">HuggingFace ↗</a>
+    <a href="https://huggingface.co/vaishna28/shuffle_20k" target="_blank" class="footer-link">HuggingFace ↗</a>
     <a href="https://doi.org/10.26434/chemrxiv-2024-gjhpq-v2" target="_blank" class="footer-link">Paper ↗</a>
   </div>
 </div>
@@ -405,10 +519,183 @@ nav{
 <script>
 const API='http://localhost:5000';
 let curF='structure',curCIF='';
+let inputMode = 'structured'; // 'structured' or 'nl'
+let nlParsedFormula = '';
+let nlParsedSG = '';
 
-function setEx(f,sg){document.getElementById('formulaIn').value=f;document.getElementById('sgIn').value=sg}
+// ─── Input Mode Toggle ────────────────────────────────────────────────────────
+function setInputMode(mode) {
+  inputMode = mode;
+  document.getElementById('modeStructured').classList.toggle('active', mode === 'structured');
+  document.getElementById('modeNL').classList.toggle('active', mode === 'nl');
+  document.getElementById('nlField').classList.toggle('visible', mode === 'nl');
+  document.getElementById('structuredFields').classList.toggle('hidden', mode === 'nl');
+  // Clear parsed state when switching
+  document.getElementById('nlParsed').classList.remove('visible');
+  document.getElementById('nlError').classList.remove('visible');
+  nlParsedFormula = '';
+  nlParsedSG = '';
+}
+
+// ─── NL Parser ────────────────────────────────────────────────────────────────
+function parseNLInput() {
+  const input = document.getElementById('nlInput').value.trim();
+  const parsedEl = document.getElementById('nlParsed');
+  const errorEl = document.getElementById('nlError');
+
+  if(!input) {
+    parsedEl.classList.remove('visible');
+    errorEl.classList.remove('visible');
+    nlParsedFormula = ''; nlParsedSG = '';
+    return;
+  }
+
+  const result = parseNaturalLanguageQuery(input);
+  if(result) {
+    nlParsedFormula = result.formula;
+    nlParsedSG = result.sg;
+    parsedEl.textContent = `✓ Parsed: formula = ${result.formula}  ·  space group = ${result.sg}`;
+    parsedEl.classList.add('visible');
+    errorEl.classList.remove('visible');
+  } else {
+    nlParsedFormula = ''; nlParsedSG = '';
+    parsedEl.classList.remove('visible');
+    errorEl.textContent = `⚠ Could not extract formula and space group. Try: "NaCl 225" or "TiO2 space group 136"`;
+    errorEl.classList.add('visible');
+  }
+}
+
+function nlKeydown(e) {
+  if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); generate(); }
+}
+
+// ─── Natural Language Query Parser ───────────────────────────────────────────
+function parseNaturalLanguageQuery(input) {
+  if(!input) return null;
+  const s = input.trim();
+
+  // Direct: "NaCl 225" or "NaCl225"
+  const direct = s.match(/^([A-Z][a-zA-Z0-9]*)\s+(\d{1,3})$/);
+  if(direct) return { formula: direct[1], sg: direct[2] };
+
+  // Extract SG number — look for "space group X", "sg X", "spacegroup X", or standalone number
+  const sgMatch = s.match(/(?:space\s*group|spacegroup|sg|group\s+number)[^\d]*(\d{1,3})/i)
+                || s.match(/\b(\d{1,3})\b/);
+
+  // Extract formula — look for chemical formula pattern (e.g. NaCl, Fe2O3, BaTiO3, TiCl)
+  // Match patterns like: capitalized letter followed by optional lowercase + numbers
+  const formulaMatch = s.match(/\b([A-Z][a-z]?(?:\d*[A-Z][a-z]?\d*)*)\b(?!\s*\d{3})/);
+
+  if(formulaMatch && sgMatch) {
+    const formula = formulaMatch[1];
+    const sg = sgMatch[1];
+    // Sanity checks
+    if(parseInt(sg) >= 1 && parseInt(sg) <= 230 && formula.length >= 2) {
+      return { formula, sg };
+    }
+  }
+  return null;
+}
+
+function setEx(f,sg){
+  document.getElementById('formulaIn').value=f;
+  document.getElementById('sgIn').value=sg;
+  // If in NL mode, switch back to structured
+  if(inputMode === 'nl') setInputMode('structured');
+}
 function showErr(msg){const e=document.getElementById('errWrap');e.style.display='block';e.textContent='⚠ '+msg}
 function hideErr(){document.getElementById('errWrap').style.display='none'}
+
+// ─── Streaming CIF Effect ────────────────────────────────────────────────────
+let streamInterval = null;
+const CIF_LINES = [
+  'data_crystal_structure',
+  '_cell_length_a   5.6402',
+  '_cell_length_b   5.6402',
+  '_cell_length_c   5.6402',
+  '_cell_angle_alpha   90.000',
+  '_cell_angle_beta    90.000',
+  '_cell_angle_gamma   90.000',
+  '_cell_volume   179.406',
+  "_symmetry_space_group_name_H-M   'F m -3 m'",
+  '_symmetry_Int_Tables_number   225',
+  'loop_',
+  '_symmetry_equiv_pos_as_xyz',
+  "  'x, y, z'",
+  "  '-x, -y, z'",
+  "  '-x, y, -z'",
+  "  'x, -y, -z'",
+  'loop_',
+  '_atom_site_type_symbol',
+  '_atom_site_label',
+  '_atom_site_fract_x',
+  '_atom_site_fract_y',
+  '_atom_site_fract_z',
+  '_atom_site_occupancy',
+];
+
+function startStreamingEffect(){
+  const wrap = document.getElementById('streamWrap');
+  const text = document.getElementById('streamText');
+  wrap.style.display = 'block';
+  text.textContent = '';
+  let lineIdx = 0;
+  let charIdx = 0;
+  streamInterval = setInterval(() => {
+    if(lineIdx >= CIF_LINES.length) lineIdx = 0;
+    const line = CIF_LINES[lineIdx];
+    if(charIdx < line.length){
+      text.textContent += line[charIdx];
+      charIdx++;
+    } else {
+      text.textContent += '\n';
+      lineIdx++;
+      charIdx = 0;
+    }
+    // Keep only last ~10 lines visible
+    const lines = text.textContent.split('\n');
+    if(lines.length > 12) text.textContent = lines.slice(-12).join('\n');
+  }, 40);
+}
+
+function stopStreamingEffect(){
+  if(streamInterval){ clearInterval(streamInterval); streamInterval = null; }
+  document.getElementById('streamWrap').style.display = 'none';
+  document.getElementById('streamText').textContent = '';
+}
+
+let cifExpanded = false;
+
+function toggleCIFExpand(){
+  cifExpanded = !cifExpanded;
+  const btn = document.getElementById('cifExpandBtn');
+  const pre = document.getElementById('cifOut');
+  if(cifExpanded){
+    pre.textContent = curCIF;
+    pre.style.maxHeight = 'none';
+    btn.textContent = '▲ Show Less';
+  } else {
+    pre.textContent = curCIF.split('\n').slice(0, 15).join('\n') + '\n...';
+    pre.style.maxHeight = '260px';
+    btn.textContent = '▼ Show Full CIF';
+  }
+}
+
+// ─── Index Dark Mode Toggle ───────────────────────────────────────────────────
+let idxDark = false;
+function toggleIndexTheme(){
+  idxDark = !idxDark;
+  document.body.classList.toggle('dark', idxDark);
+  document.getElementById('idxThemeLabel').textContent = idxDark ? 'Light Mode' : 'Dark Mode';
+  const icon = document.getElementById('idxThemeIcon');
+  icon.innerHTML = idxDark
+    ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+    : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  localStorage.setItem('crystext_idx_theme', idxDark ? 'dark' : 'light');
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  if(localStorage.getItem('crystext_idx_theme') === 'dark'){ idxDark=false; toggleIndexTheme(); }
+});
 
 function setStep(n){
   for(let i=1;i<=4;i++){
@@ -421,18 +708,42 @@ function setStep(n){
 }
 
 async function generate(){
-  const formula=document.getElementById('formulaIn').value.trim();
-  const sg=document.getElementById('sgIn').value.trim();
-  if(!formula){showErr('Please enter a formula');return}
-  if(!sg){showErr('Please enter a space group number');return}
-  hideErr();curF=formula;
+  let formula, sg;
+
+  if(inputMode === 'nl') {
+    // Parse from NL input
+    const nlText = document.getElementById('nlInput').value.trim();
+    if(!nlText) { showErr('Please enter a description'); return; }
+    const parsed = parseNaturalLanguageQuery(nlText);
+    if(!parsed) {
+      showErr('Could not extract formula and space group. Try: "NaCl 225" or "TiO2 space group 136"');
+      return;
+    }
+    formula = parsed.formula;
+    sg = parsed.sg;
+  } else {
+    formula = document.getElementById('formulaIn').value.trim();
+    sg = document.getElementById('sgIn').value.trim();
+    if(!formula){showErr('Please enter a formula');return}
+    if(!sg){showErr('Please enter a space group number');return}
+  }
+
+  hideErr(); curF=formula;
+  // Clear previous result
+  document.getElementById('resultPanel').style.display='none';
+  document.getElementById('placeholder').style.display='flex';
   document.getElementById('genBtn').disabled=true;
   document.getElementById('loadWrap').style.display='block';
-  setStep(1);await sleep(400);setStep(2);
+  setStep(1); await sleep(400); setStep(2);
+
+  // Start streaming CIF simulation after step 2
+  startStreamingEffect();
+
   try{
     const res=await fetch(API+'/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({formula,spacegroup:sg})});
     const data=await res.json();
     if(data.error){showErr(data.error);reset();return}
+    stopStreamingEffect();
     setStep(3);await sleep(300);setStep(4);await sleep(300);
     document.getElementById('loadFill').style.width='100%';
     await sleep(400);
@@ -443,16 +754,10 @@ async function generate(){
       validation: data.validation||{},
       refinement: data.refinement||{}
     }));
-    // Open structure page in new tab
-    const url = `structure.html?formula=${encodeURIComponent(formula)}&sg=${encodeURIComponent(sg)}`;
-    const a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    reset();
+    // Show result in panel
+    showResult(formula, sg, data.cif, data.validation||{});
+    document.getElementById('genBtn').disabled=false;
+    document.getElementById('loadWrap').style.display='none';
   }catch(e){
     showErr('Cannot connect to backend. Make sure app.py is running on port 5000.');
     reset();
@@ -460,48 +765,45 @@ async function generate(){
 }
 
 function reset(){
+  stopStreamingEffect();
   document.getElementById('genBtn').disabled=false;
   document.getElementById('loadWrap').style.display='none';
   document.getElementById('placeholder').style.display='flex';
+  document.getElementById('resultPanel').style.display='none';
 }
 
-function showResult(formula,sg,cif,val){
-  document.getElementById('genBtn').disabled=false;
-  document.getElementById('loadWrap').style.display='none';
-  document.getElementById('resFormula').textContent=val.detected_formula||formula;
-  document.getElementById('resSG').textContent='Space Group: '+(val.detected_spacegroup||sg)+' · Input: '+formula+' SG '+sg;
-  const badges=document.getElementById('resBadges');
-  badges.innerHTML='';
-  badges.innerHTML+=val.valid?'<span class="badge valid">✓ Valid CIF</span>':'<span class="badge invalid">✗ Invalid CIF</span>';
-  badges.innerHTML+=val.composition_match?'<span class="badge valid">✓ Composition Match</span>':'<span class="badge warn">⚠ Mismatch</span>';
-  document.getElementById('cifOut').textContent=cif;
-  buildProps(val,cif);
-  document.getElementById('resultPanel').style.display='block';
-  switchTab('viewer',document.querySelector('.tab'));
-  buildViewer(cif,formula,val);
+function openStructurePage(){
+  const cached = localStorage.getItem('crystext_result');
+  if(!cached) return;
+  const data = JSON.parse(cached);
+  const url = `structure.html?formula=${encodeURIComponent(data.formula)}&sg=${encodeURIComponent(data.sg)}`;
+  const a = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function showResult(formula, sg, cif, val){
+  document.getElementById('placeholder').style.display='none';
+  document.getElementById('resFormula').textContent = val.detected_formula || formula;
+  document.getElementById('resSG').textContent = 'Space Group: '+(val.detected_spacegroup||sg)+' · Input: '+formula+' SG '+sg;
+  const badges = document.getElementById('resBadges');
+  badges.innerHTML = '';
+  badges.innerHTML += val.valid ? '<span class="badge valid">✓ Valid CIF</span>' : '<span class="badge invalid">✗ Invalid CIF</span>';
+  badges.innerHTML += val.composition_match ? '<span class="badge valid">✓ Composition Match</span>' : '<span class="badge warn">⚠ Mismatch</span>';
+  // Show first 15 lines only
+  cifExpanded = false;
+  document.getElementById('cifOut').textContent = cif.split('\n').slice(0,15).join('\n') + '\n...';
+  document.getElementById('cifOut').style.maxHeight = '260px';
+  document.getElementById('cifExpandBtn').textContent = '▼ Show Full CIF';
+  curCIF = cif;
+  buildProps(val, cif);
+  document.getElementById('resultPanel').style.display = 'block';
 }
 
 function buildProps(val,cif){
-  const cellA=cif.match(/_cell_length_a\s+([\d.]+)/);
-  const cellB=cif.match(/_cell_length_b\s+([\d.]+)/);
-  const cellC=cif.match(/_cell_length_c\s+([\d.]+)/);
-  const alpha=cif.match(/_cell_angle_alpha\s+([\d.]+)/);
-  const beta=cif.match(/_cell_angle_beta\s+([\d.]+)/);
-  const gamma=cif.match(/_cell_angle_gamma\s+([\d.]+)/);
-  const vol=cif.match(/_cell_volume\s+([\d.]+)/);
-  const cp=[
-    {l:'a (Å)',v:cellA?parseFloat(cellA[1]).toFixed(3):'—'},
-    {l:'b (Å)',v:cellB?parseFloat(cellB[1]).toFixed(3):'—'},
-    {l:'c (Å)',v:cellC?parseFloat(cellC[1]).toFixed(3):'—'},
-    {l:'α (°)',v:alpha?parseFloat(alpha[1]).toFixed(2):'—'},
-    {l:'β (°)',v:beta?parseFloat(beta[1]).toFixed(2):'—'},
-    {l:'γ (°)',v:gamma?parseFloat(gamma[1]).toFixed(2):'—'},
-  ];
-  if(vol)cp.push({l:'Volume (Å³)',v:parseFloat(vol[1]).toFixed(2)});
-  document.getElementById('propGrid').innerHTML=cp.map(p=>`<div class="prop-card"><div class="prop-label">${p.l}</div><div class="prop-val">${p.v}</div></div>`).join('');
   const vp=[
-    {l:'Valid CIF',v:val.valid?'Yes':'No'},
-    {l:'Composition Match',v:val.composition_match?'Yes':'No'},
+    {l:'Valid CIF',v:val.valid?'Yes ✓':'No ✗'},
+    {l:'Composition Match',v:val.composition_match?'Yes ✓':'No ✗'},
     {l:'Detected Formula',v:val.detected_formula||'—'},
     {l:'Space Group',v:val.detected_spacegroup||'—'},
   ];
@@ -550,8 +852,19 @@ function buildViewer(cifText,formula,validation){
 
 function parseCIFAtoms(cif){const atoms=[];const lines=cif.split('\n');let xIdx=-1,yIdx=-1,zIdx=-1,elIdx=-1,labelIdx=-1,headers=[],inAtom=false;for(let i=0;i<lines.length;i++){const l=lines[i].trim();if(l==='loop_'){headers=[];xIdx=-1;yIdx=-1;zIdx=-1;elIdx=-1;labelIdx=-1;inAtom=false;continue}if(l.startsWith('_atom_site_')){headers.push(l);inAtom=true;if(l==='_atom_site_fract_x')xIdx=headers.length-1;if(l==='_atom_site_fract_y')yIdx=headers.length-1;if(l==='_atom_site_fract_z')zIdx=headers.length-1;if(l==='_atom_site_type_symbol')elIdx=headers.length-1;if(l==='_atom_site_label')labelIdx=headers.length-1;continue}if(inAtom&&xIdx>=0&&l.length>0&&!l.startsWith('_')&&!l.startsWith('loop_')&&!l.startsWith('data_')){const p=l.split(/\s+/);if(p.length>Math.max(xIdx,yIdx,zIdx)){let el=elIdx>=0?p[elIdx]:(labelIdx>=0?p[labelIdx].replace(/[0-9+\-]/g,''):'X');el=el.charAt(0).toUpperCase()+el.slice(1).toLowerCase();const x=parseFloat(p[xIdx]),y=parseFloat(p[yIdx]),z=parseFloat(p[zIdx]);if(!isNaN(x)&&!isNaN(y)&&!isNaN(z))atoms.push({element:el,x,y,z})}}if(inAtom&&xIdx>=0&&(l.startsWith('loop_')||l.startsWith('_cell')||l.startsWith('_symmetry')||l.startsWith('data_')))inAtom=false}return atoms}
 
-function copyCIF(){navigator.clipboard.writeText(document.getElementById('cifOut').textContent).then(()=>{const btns=document.querySelectorAll('.cif-btn');btns.forEach(b=>{if(b.textContent.includes('Copy')){b.textContent='Copied!';setTimeout(()=>b.textContent='Copy to Clipboard',1500)}})})}
-function dlCIF(){const blob=new Blob([document.getElementById('cifOut').textContent],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=curF+'.cif';a.click()}
+function copyCIF(){
+  navigator.clipboard.writeText(curCIF).then(()=>{
+    const btns=document.querySelectorAll('.cif-btn');
+    btns.forEach(b=>{if(b.textContent.trim()==='Copy'){const orig=b.textContent;b.textContent='Copied!';setTimeout(()=>b.textContent=orig,1500)}});
+  });
+}
+function dlCIF(){
+  const blob=new Blob([curCIF],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=curF+'.cif';
+  a.click();
+}
 
 // CRYSTAL SHAPES ANIMATION
 window.addEventListener('load', function(){
@@ -758,8 +1071,9 @@ window.addEventListener('load', function(){
 </div>
 
 <script>
-// REPLACE THIS WITH YOUR GEMINI API KEY (starts with AIza...)
-const CLAUDE_API_KEY = 'gemini_api_key_here';
+// REPLACE WITH YOUR KEYS
+const GEMINI_API_KEY = 'key';
+const GROQ_API_KEY = 'key'; // paste gsk_... key here
 
 const SYSTEM_PROMPT = `You are a specialized materials science assistant embedded in CrysText, an AI tool for crystal structure generation. You ONLY answer questions related to:
 - Crystal structures, crystallography, and CIF files
@@ -777,6 +1091,7 @@ Keep answers clear, concise, and friendly. Use simple language for non-experts.`
 
 let chatHistory = [];
 let chatOpen = false;
+let msgCounter = 0;
 
 function toggleChat(){
   chatOpen = !chatOpen;
@@ -804,26 +1119,60 @@ async function sendChat(){
 
   const typingId = addMsg('Thinking...', 'bot typing');
 
+  // Try Groq directly first (fastest, most reliable)
+  if(GROQ_API_KEY && GROQ_API_KEY !== 'YOUR_GROQ_API_KEY_HERE') {
+    try {
+      const groqMessages = [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...chatHistory
+      ];
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GROQ_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: groqMessages,
+          max_tokens: 500,
+          temperature: 0.7
+        })
+      });
+      const data = await res.json();
+      const reply = data.choices?.[0]?.message?.content;
+      if(reply) {
+        removeMsg(typingId);
+        addMsg(reply, 'bot');
+        chatHistory.push({role:'assistant', content: reply});
+        document.getElementById('chatSend').disabled = false;
+        input.focus();
+        return;
+      }
+    } catch(e) {
+      console.warn('Groq direct call failed, trying Flask fallback...', e);
+    }
+  }
+
+  // Fallback — Flask /chat endpoint (tries Groq then Gemini)
   try {
     const res = await fetch('http://localhost:5000/chat', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         messages: chatHistory,
-        api_key: CLAUDE_API_KEY
+        api_key: GEMINI_API_KEY,
+        groq_key: GROQ_API_KEY
       })
     });
-
     const data = await res.json();
     const reply = data.reply || data.error || 'Sorry, could not get a response.';
-
     removeMsg(typingId);
     addMsg(reply, 'bot');
     chatHistory.push({role:'assistant', content: reply});
-
   } catch(e) {
     removeMsg(typingId);
-    addMsg('Connection error. Please check your internet and try again.', 'bot');
+    addMsg('Connection error. Please check app.py is running.', 'bot');
   }
 
   document.getElementById('chatSend').disabled = false;
@@ -832,7 +1181,7 @@ async function sendChat(){
 
 function addMsg(text, cls){
   const msgs = document.getElementById('chatMsgs');
-  const id = 'msg_' + Date.now();
+  const id = 'msg_' + (++msgCounter);
   const div = document.createElement('div');
   div.className = 'msg ' + cls;
   div.id = id;
