@@ -16,7 +16,7 @@ Type a formula like `NaCl` and space group `225` — or describe it in natural l
 - **Fine-tuning:** QLoRA (r=16, lora_alpha=16), 4-bit quantization
 - **Dataset:** MP-20 (27,136 experimentally verified crystal structures)
 - **Training:** Epoch 1 (full 27k) + Epoch 2 (shuffled 20k continuation)
-- **Current Model:** https://huggingface.co/vaishna28/shuffle_20k
+- **Current Model:** https://huggingface.co/rakshitha9/crystext-mistral-10k
 
 ### Evaluation Results (Epoch 2 Model, n=10)
 
@@ -54,7 +54,8 @@ pip install -r requirements.txt
 
 ## API Keys Setup
 
-Before running, add your API keys in the frontend files:
+Before running, add your API keys. For demo/local use only — never expose real API keys in frontend files in production. 
+For local testing, add them directly:
 
 **In `index.html`** (find these lines near the bottom):
 ```javascript
@@ -224,4 +225,5 @@ Tests all endpoints — health, refine, generate, batch, reward.
 - Generation takes ~2-3 minutes per structure on RTX 5050 Laptop GPU
 - Requires CUDA GPU — CPU inference is extremely slow
 - Space group accuracy is 60% — model sometimes generates a related but different space group
-- GRPO training requires 24GB+ VRAM (pipeline implemented, not yet trained on full dataset)
+- - Multi-sample generation via `/generate_batch` improves output quality significantly — run with N=5 candidates for best results
+- GRPO training requires 24GB+ VRAM (pipeline implemented, not yet trained on full dataset.
