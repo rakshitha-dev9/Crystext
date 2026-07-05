@@ -1,6 +1,7 @@
 # CrysText — Text-Conditioned Crystal Structure Generation
 
 Generate valid crystal structure CIF files from a material formula and space group number using a fine-tuned large language model.
+![CrysText Demo](demo.png)
 
 ---
 
