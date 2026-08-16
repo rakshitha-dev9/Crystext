@@ -14,6 +14,15 @@ Type a formula like `NaCl` and space group `225` → CrysText generates a comple
 
 Natural language input is also supported (e.g. *"generate a rock salt structure for sodium chloride"*), with a formula/space-group parser extracting the structured inputs automatically.
 
+![CrysText architecture diagram](assets/demo1.png)
+
+
+![CrysText architecture diagram](assets/demo2.png)
+
+---
+
+---
+
 ---
 
 ## Why This Matters
@@ -76,6 +85,12 @@ Used for candidate scoring and as the basis for planned GRPO fine-tuning:
 - Training script: ✅ written (`grpo_train.py`, num_generations=6)
 - Actually trained: ❌ **not yet** — requires 24GB VRAM
 - Expected impact: space group accuracy 60% → ~99%
+
+---
+
+## Architecture
+
+![CrysText architecture diagram](assets/architechture.png)
 
 ---
 
