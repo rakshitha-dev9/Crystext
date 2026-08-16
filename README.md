@@ -1,26 +1,39 @@
 # CrysText — Text-Conditioned Crystal Structure Generation
 
-Generate valid crystal structure CIF files from a material formula and space group number using a fine-tuned large language model.
+Generate valid crystal structure CIF files from a material formula and space group number using a fine-tuned large language model — rendered live as an interactive 3D structure.
 
-![CrysText Demo](demo.png)
+> **Type a formula. Get a crystal structure.**
+
+Selected for **KMIT Expo** (Group G-1225) · Built by a team of 5 under the mentorship of **Dr. Ashok Sharma**
 
 ---
 
 ## What It Does
 
-Type a formula like `NaCl` and space group `225` — or describe it in natural language like *"generate a structure for NaCl with space group 225"* — and CrysText generates a complete Crystallographic Information File (CIF) with cell parameters, atom positions, and symmetry information, rendered as an interactive 3D ball-and-stick structure in a dedicated structure viewer page.
+Type a formula like `NaCl` and space group `225` → CrysText generates a complete Crystallographic Information File (CIF) with cell parameters, atom positions, and symmetry information, then renders it as an interactive 3D ball-and-stick structure in the browser — no domain software required.
+
+Natural language input is also supported (e.g. *"generate a rock salt structure for sodium chloride"*), with a formula/space-group parser extracting the structured inputs automatically.
 
 ---
 
-## Model
+## Why This Matters
 
-- **Base:** Mistral-7B-v0.3
-- **Fine-tuning:** QLoRA (r=16, lora_alpha=16), 4-bit quantization
-- **Dataset:** MP-20 (27,136 experimentally verified crystal structures)
-- **Training:** Epoch 1 (full 27k) + Epoch 2 (shuffled 20k continuation)
-- **Current Model:** https://huggingface.co/rakshitha9/crystext-mistral-10k
+A paper independently introducing the same core methodology — Mistral-7B/LLaMA-3.1-8B, QLoRA fine-tuning, MP-20 dataset, GRPO reward shaping — was published by researchers at the University of Utah:
 
-### Evaluation Results (Epoch 2 Model, n=10)
+> Mohanty, T., Mehta, M., Sayeed, H.M. et al. **"CrysText: A Generative AI Approach for Text-Conditioned Crystal Structure Generation Using LLM."** *Integrating Materials and Manufacturing Innovation* (2026). https://doi.org/10.1007/s40192-026-00451-8 — [preprint (ChemRxiv)](https://chemrxiv.org/engage/chemrxiv/article-details/6902b85bef936fb4a21c992a)
+
+Their results validate the underlying approach. This project was developed independently and adds, on top of the validated method:
+- A full deployable web app (Flask backend + browser frontend)
+- Interactive 3D structure rendering (NGL Viewer)
+- Confidence scoring per generation
+- Natural-language input mode
+- An integrated chatbot for structure Q&A
+
+**The paper proves the science. This is the product.**
+
+---
+
+## Results (n=10 evaluation set)
 
 | Metric | Score |
 |---|---|
@@ -28,21 +41,86 @@ Type a formula like `NaCl` and space group `225` — or describe it in natural l
 | Composition Accuracy | 100% |
 | Space Group Accuracy | 60% |
 | Structure Match Rate | 40% |
-| Train Loss | 0.1931 |
-| Val Loss | 0.1992 |
-| Test Loss | 0.1880 |
+| F1 Score (Space Group) | 0.75 |
+| Train / Val / Test Loss | 0.193 / 0.199 / 0.188 |
+| Train–Test Gap | 0.005 → well-fitted, no overfitting |
+
+Best model: [`vaishna28/shuffle_20k`](https://huggingface.co/vaishna28/shuffle_20k) — fine-tuned on a shuffled 20k-sample subset of the ~45K-structure MP-20 dataset, Epoch 2.
+
+---
+
+## Model & Training
+
+- **Base model:** Mistral-7B-v0.3 (outperforms LLaMA-2-13B on relevant benchmarks)
+- **Fine-tuning:** Supervised Fine-Tuning via QLoRA — rank=16, lora_alpha=16, 4-bit quantization (~42M trainable parameters)
+- **Target layers:** `q_proj`, `k_proj`, `v_proj`, `o_proj` (attention layers)
+- **Dataset:** [MP-20](https://materialsproject.org) — ~45,000 experimentally verified inorganic crystal structures; trained on a curated 27,136-structure subset
+- **Training format:** Alpaca instruction template (instruction → input → CIF response)
+- **Training stack:** Unsloth + HuggingFace TRL's `SFTTrainer`, on a Kaggle T4 GPU
+- **Inference:** RTX 5050 Laptop GPU (8.5GB VRAM), ~2–3 min per generation
+
+### Reward Function
+
+Used for candidate scoring and as the basis for planned GRPO fine-tuning:
+
+| Criterion | Points |
+|---|---|
+| Valid CIF Parse | 0.10 |
+| Physical Validity (no atom overlap, valid volume) | 0.20 |
+| Composition Match | 0.20 |
+| Structure Similarity (StructureMatcher) | 0.50 |
+
+### GRPO Status
+
+- Reward function: ✅ written (`crystext_rewards.py`)
+- Training script: ✅ written (`grpo_train.py`, num_generations=6)
+- Actually trained: ❌ **not yet** — requires 24GB VRAM
+- Expected impact: space group accuracy 60% → ~99%
+
+---
+
+## Pipeline
+
+1. **User Input** — formula + space group, via structured form or natural language
+2. **Prompt Refinement** — normalize formula (`nacl` → `NaCl`), wrap in Alpaca template
+3. **Mistral-7B + QLoRA** — autoregressive CIF generation, token by token
+4. **Pymatgen Validation** — parse CIF, verify composition, detect space group
+5. **Reward Scoring** — confidence score (0–100%) combining parse/composition/space-group/reward checks
+6. **NGL Viewer** — interactive 3D rendering with atom colors and cell parameters
+
+---
+
+## Demo Compounds
+
+| Formula | Space Group | Structure Type | Status |
+|---|---|---|---|
+| NaCl | 225 | Rock salt (cubic) | ✅ Works |
+| GaAs | 216 | Zinc blende | ✅ Works (94 atoms in NGL) |
+| MgO | 225 | Rock salt (cubic) | ✅ Works |
+| Au | 225 | FCC metal | ✅ Works |
+| LiCoO₂ | 166 | Layered oxide | ✅ Works — real EV battery cathode |
+| TiO₂ | 136 | Rutile | ✅ Works |
+| Fe₂O₃ | 167 | Hematite | ✅ Works |
+| Si | 227 | Diamond cubic | ✅ Works |
+| BaTiO₃ | 99 | Perovskite | ⚠️ Generates as SG 221 |
+| GaN | 186 | Hexagonal wurtzite | ❌ Model struggles (hexagonal underrepresented in MP-20) |
+
+---
+
+## Tech Stack
+
+**Backend:** Flask (port 5000), PyTorch, `transformers`, `peft`, `bitsandbytes`, `pymatgen`
+**Frontend:** HTML/CSS/JavaScript, [NGL Viewer](https://nglviewer.org/) (WebGL 3D ball-and-stick)
+**Chatbot:** Groq (Llama 3.3 70B) primary, Gemini 2.5 Flash fallback
+**Training:** Kaggle T4 GPU, Unsloth, TRL, SFTTrainer
 
 ---
 
 ## Requirements
 
 - Python 3.10+
-- CUDA GPU with at least **8GB VRAM**
+- CUDA GPU with at least 8GB VRAM
 - CUDA drivers installed
-- Gemini API key (free at [aistudio.google.com](https://aistudio.google.com))
-- Groq API key (free at [console.groq.com](https://console.groq.com))
-
----
 
 ## Installation
 
@@ -52,77 +130,26 @@ cd Crystext
 pip install -r requirements.txt
 ```
 
----
-
-## API Keys Setup
-
-Before running, add your API keys. For demo/local use only — never expose real API keys in frontend files in production. 
-For local testing, add them directly:
-
-**In `index.html`** (find these lines near the bottom):
-```javascript
-const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
-const GROQ_API_KEY = 'YOUR_GROQ_API_KEY';
-```
-
-**In `structure.html`** (find these lines near the bottom):
-```javascript
-const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
-const GROQ_API_KEY = 'YOUR_GROQ_API_KEY';
-```
-
-The chatbot uses **Groq (Llama 3.3 70B) as primary** and Gemini as fallback — so if Gemini is unavailable during demo, Groq takes over automatically.
-
----
-
-## Running The App
+## Running the App
 
 You need two terminals open at the same time.
 
-**Terminal 1 — Start the Flask backend:**
+**Terminal 1 — start the Flask backend (loads the model):**
 ```bash
 python app.py
 ```
-Wait until you see:
+Wait for:
 ```
-CrysText is ready! Server starting on http://localhost:5000
+✅ CrysText is ready! Server starting on http://localhost:5000
 ```
-This takes 5-10 minutes on first run (model downloading and loading).
+This takes 10–15 minutes on first run while the model downloads and loads.
 
-**Terminal 2 — Start the frontend:**
+**Terminal 2 — start the frontend:**
 ```bash
 python -m http.server 8080
 ```
 
-**Then open your browser:**
-```
-http://localhost:8080/index.html
-```
-
----
-
-## How It Works
-
-1. User enters formula + space group (structured mode) or describes it in natural language
-2. Frontend sends to Flask backend → prompt refinement → model inference → CIF validation
-3. Result appears in the right panel with validation badges and CIF preview
-4. Click **Visualize 3D Structure** → structure page opens instantly from cache (no re-generation)
-5. Structure page shows 3D viewer, cell parameters, properties, compound info via AI
-
----
-
-## Good Demo Compounds
-
-| Formula | Space Group | Structure Type |
-|---|---|---|
-| NaCl | 225 | Rock salt (cubic) |
-| GaAs | 216 | Zinc blende |
-| BaTiO3 | 99 | Perovskite (tetragonal) |
-| TiO2 | 136 | Rutile |
-| Fe2O3 | 167 | Hematite |
-| MgO | 225 | Rock salt (cubic) |
-| LiCoO2 | 166 | Layered oxide (Li-ion batteries) |
-| Si | 227 | Diamond cubic |
+**Then open:** `http://localhost:8080/index.html`
 
 ---
 
@@ -131,101 +158,35 @@ http://localhost:8080/index.html
 ```
 Crystext/
 ├── app.py                     ← Flask backend (port 5000)
-├── index.html                 ← Main UI — input + result page (port 8080)
-├── structure.html             ← 3D structure viewer page
-├── prompt_refinement.py       ← Auto-corrects user input typos
-├── llm_prompt_refiner.py      ← LLM-based prompt refinement (Qwen)
-├── requirements.txt           ← Python dependencies
-├── README.md                  ← This file
+├── index.html                 ← Main UI
+├── structure.html             ← NGL 3D viewer
+├── prompt_refinement.py
+├── llm_prompt_refiner.py
+├── requirements.txt
+├── README.md
 └── training/
-    ├── crystext_training.ipynb      ← Kaggle SFT training notebook
-    ├── grpo_train.py                ← GRPO/CrysText-RL training script
-    ├── crystext_rewards.py          ← Paper-aligned reward function
-    ├── crystext_grpo_reward.py      ← TRL-compatible reward wrapper
-    ├── dataset_utils.py             ← GRPO dataset preparation
-    ├── prepare_grpo_dataset.py      ← Export MP-20 CSV to JSONL
+    ├── crystext_training.ipynb
+    ├── grpo_train.py
+    ├── crystext_rewards.py    ← imported by app.py
+    ├── crystext_grpo_reward.py
+    ├── dataset_utils.py
+    ├── prepare_grpo_dataset.py
     └── __init__.py
 ```
 
 ---
 
-## Backend API Endpoints
+## Known Limitations & Future Work
 
-| Endpoint | Method | Description |
-|---|---|---|
-| `/generate` | POST | Single CIF generation |
-| `/generate_batch` | POST | Multi-sample generation (N candidates) |
-| `/refine_prompt` | POST | Auto-correct formula/space group typos |
-| `/evaluate_reward` | POST | Score a CIF using paper reward function |
-| `/chat` | POST | Materials science chatbot (Groq + Gemini fallback) |
-| `/health` | GET | Backend status check |
+- Space group accuracy currently 60% — GRPO training (code ready, needs 24GB VRAM hardware) is expected to raise this significantly
+- Hexagonal structures (e.g. SG 186, 194) underperform — underrepresented in the MP-20 training set
+- API keys (Groq/Gemini) currently live in frontend HTML — move to environment variables before any public deployment
+- Planned: deployment on HuggingFace Spaces (ZeroGPU) for public access
+- Potential submission target: *npj Computational Materials* or *Digital Discovery*
 
 ---
 
-## Features
+## Team
 
-### Natural Language Input
-Describe structures in plain English:
-- *"generate a structure for TiCl with space group 98"*
-- *"NaCl in rock salt structure 225"*
-- *"iron oxide Fe2O3 space group 167"*
-
-The frontend parses the formula and space group automatically before sending to the model.
-
-### Prompt Refinement
-Automatically fixes user input errors before generation:
-- `nacl` → `NaCl`
-- `22O` → `225` (OCR-style typos)
-- `rock salt` → `NaCl, 225` (plain English)
-- `Barium Titanate` → `BaTiO3`
-
-### AI Compound Info (Quick Info Buttons)
-On the structure page, click buttons to instantly get:
-- **What is this?** — crystal structure and chemistry overview
-- **Common Names** — everyday names (e.g. "table salt" for NaCl)
-- **Uses** — industrial and research applications
-- **Fun Fact** — interesting materials science fact
-
-Powered by Groq Llama 3.3 70B (primary) with Gemini fallback.
-
-### Materials Science Chatbot
-Floating chat widget on both pages. Specialized in crystal structures, space groups, CIF files, DFT, and materials science. Uses Groq as primary for reliability during demos.
-
-### Light / Dark Mode
-Toggle button in the top-right nav on both pages. Preference saved across sessions.
-
-### GRPO Reward Function (Paper-Aligned)
-Scores generated CIFs in 4 stages:
-1. CIF parse validity (+0.10)
-2. Physical validity — bond distances, volume (+0.20)
-3. Composition match — correct elements (+0.20)
-4. Structure match vs ground truth (+0.50)
-
-### 3D Structure Viewer
-Materials Project-inspired layout:
-- Large 3D ball-and-stick viewer with NGL
-- Element color legend overlaid on viewer
-- Cell parameters panel (a, b, c, α, β, γ)
-- Properties table (space group, Z, volume, valid CIF)
-- Ball & Stick / Space Fill / Wireframe view modes
-
----
-
-## Testing
-
-```bash
-python test_api.py
-```
-
-Tests all endpoints — health, refine, generate, batch, reward.
-
----
-
-## Known Limitations
-
-- Works best for compounds present in MP-20 training set
-- Generation takes ~2-3 minutes per structure on RTX 5050 Laptop GPU
-- Requires CUDA GPU — CPU inference is extremely slow
-- Space group accuracy is 60% — model sometimes generates a related but different space group
-- - Multi-sample generation via `/generate_batch` improves output quality significantly — run with N=5 candidates for best results
-- GRPO training requires 24GB+ VRAM (pipeline implemented, not yet trained on full dataset.
+Built by a team of 5 — Rakshitha (backend/model integration), Charanya, Vaishnavi, Arnamsh, Himanesh — as part of an AI + Materials Science project at KMIT.
+Mentored by **Dr. Ashok Sharma**. Training on Kaggle T4 GPU; inference validated locally on RTX 5050.
